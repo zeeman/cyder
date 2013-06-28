@@ -1,7 +1,7 @@
 from tastypie.test import ResourceTestCase
 
-from cyder.cydns.tests.test_views_template import random_label
-from cyder.cydns.tests.test_views_template import random_byte
+from cyder.base.tests.test_views_template import random_label
+from cyder.base.tests.test_views_template import random_byte
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.domain.models import Domain

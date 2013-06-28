@@ -1,6 +1,6 @@
 from tastypie.test import ResourceTestCase
 from cyder.cydhcp.interface.static_intr.models import StaticIntrKeyValue
-from cyder.cydns.tests.test_views_template import random_label
+from cyder.base.tests.test_views_template import random_label
 
 import json as json
 
