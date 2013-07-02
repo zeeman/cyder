@@ -33,8 +33,8 @@ def build_sample_domain():
 
 
 class CydnsAPITests(object):
-    object_list_url = "/cydns/api/v{0}_dns/{1}/"
-    object_url = "/cydns/api/v{0}_dns/{1}/{2}/"
+    object_list_url = "/dns/api/v{0}_dns/{1}/"
+    object_url = "/dns/api/v{0}_dns/{1}/{2}/"
 
     def setUp(self):
         super(CydnsAPITests, self).setUp()
@@ -110,6 +110,7 @@ class CydnsAPITests(object):
         obj_count = self.test_type.objects.count()
         create_url = self.object_list_url.format(
             API_VERSION, str(self.test_type.__name__).lower())
+
         resp = self.api_client.post(create_url, format='json', data=post_data)
         self.assertHttpCreated(resp)
         # Verify a new one has been added.
@@ -171,8 +172,8 @@ class CydnsAPITests(object):
 
 class MangleTests(ResourceTestCase):
     test_type = CNAME
-    object_list_url = "/cydns/api/v{0}_dns/{1}/"
-    object_url = "/cydns/api/v{0}_dns/{1}/{2}/"
+    object_list_url = "/dns/api/v{0}_dns/{1}/"
+    object_url = "/dns/api/v{0}_dns/{1}/{2}/"
 
     def setUp(self):
         super(MangleTests, self).setUp()
@@ -235,8 +236,8 @@ class MangleTests(ResourceTestCase):
 
 class DomainLeakTests(ResourceTestCase):
     test_type = CNAME
-    object_list_url = "/cydns/api/v{0}_dns/{1}/"
-    object_url = "/cydns/api/v{0}_dns/{1}/{2}/"
+    object_list_url = "/dns/api/v{0}_dns/{1}/"
+    object_url = "/dns/api/v{0}_dns/{1}/{2}/"
 
     def setUp(self):
         super(DomainLeakTests, self).setUp()
@@ -259,7 +260,7 @@ class DomainLeakTests(ResourceTestCase):
         return {
             # We are fucking this up on purpose.
             'fuckinup': random_label(),
-            'fqdn': "c{0}.{1}.{2)}".format(random_label(), random_label(),
+            'fqdn': "c{0}.{1}.{2}".format(random_label(), random_label(),
                                            self.domain.name),
         }
 
