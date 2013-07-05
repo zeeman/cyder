@@ -14,6 +14,8 @@ from cyder.cydns.txt.models import TXT
 from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.view.models import View
 
+from cyder.cydns.tests.utils import create_fake_zone
+
 import json as json
 
 API_VERSION = '1'
@@ -36,11 +38,19 @@ class CydnsAPITests(object):
     object_list_url = "/dns/api/v{0}_dns/{1}/"
     object_url = "/dns/api/v{0}_dns/{1}/{2}/"
 
-    def setUp(self):
+    def setUp(self, test_class, test_data, use_domain=True, use_rdomain=False):
         super(CydnsAPITests, self).setUp()
-        self.domain = build_sample_domain()
-        View(name='public').save()
-        View(name='private').save()
+        View.objects.get_or_create(name='public')
+        View.objects.get_or_create(name='private')
+        self.domain = create_fake_zone(random_label(), suffix='oregonstate.edu')
+        Domain.objects.create(name=random_label() + '.' + self.domain.name,
+                              soa=self.domain.soa) #subdomain
+        reverse_domain = create_fake_zone('196.in-addr.arpa', suffix='')
+        if use_domain:
+            test_data['domain'] = self.domain
+        if use_rdomain:
+            test_data['reverse_domain'] = reverse_domain
+        test_obj, create = test_class.objects.get_or_create(**test_data)
 
     def test_create(self):
         resp, post_data = self.generic_create(self.post_data())
@@ -110,7 +120,6 @@ class CydnsAPITests(object):
         obj_count = self.test_type.objects.count()
         create_url = self.object_list_url.format(
             API_VERSION, str(self.test_type.__name__).lower())
-
         resp = self.api_client.post(create_url, format='json', data=post_data)
         self.assertHttpCreated(resp)
         # Verify a new one has been added.
@@ -287,7 +296,6 @@ class MXAPITests(CydnsAPITests, ResourceTestCase):
             'fqdn':  'e' + random_label() + "." + self.domain.name,
             'server': random_label(),
             'priority': 123,
-            'ttl': 213
         }
 
 
@@ -322,7 +330,7 @@ class NameserverAPITests(CydnsAPITests, ResourceTestCase):
     test_type = Nameserver
 
     def test_fqdn_create(self):
-        pass
+        assert True is False
 
     def post_data(self):
         return {
@@ -347,31 +355,35 @@ class SSHFPAPITests(CydnsAPITests, ResourceTestCase):
         }
 
 
-class AdderessRecordV4APITests(CydnsAPITests, ResourceTestCase):
+class AddressRecordV4APITests(CydnsAPITests, ResourceTestCase):
     test_type = AddressRecord
 
     def setUp(self):
-        super(AdderessRecordV4APITests, self).setUp()
+        test_data = {
+            'label': random_label(),
+            'ip_type': '4',
+            'ip_str': '196.168.1.1',
+        }
+        super(AddressRecordV4APITests, self).setUp(self.test_type, test_data)
 
     def post_data(self):
         return {
-            'description': random_label(),
+            'fqdn': self.domain.name,
+            'ip_type': '4',
+            'ip_str': '196.168.1.2',
             'ttl': random_byte(),
-            'fqdn': 'i' + random_label() + "." + self.domain.name,
-            'ip_str': "11.{0}.{1}.{2}".format(
-                random_byte(), random_byte(), random_byte()),
-            'ip_type': '4'
+            'description': random_label(),
         }
 
 
-class AdderessRecordV6APITests(CydnsAPITests, ResourceTestCase):
+class AddressRecordV6APITests(CydnsAPITests, ResourceTestCase):
     test_type = AddressRecord
 
     def setUp(self):
         #Domain.objects.get_or_create(name='arap')
         #Domain.objects.get_or_create(name='ipv6.arap')
         #Domain.objects.get_or_create(name='1.ipv6.arap')
-        super(AdderessRecordV6APITests, self).setUp()
+        super(AddressRecordV6APITests, self).setUp()
 
     def post_data(self):
         return {
@@ -394,7 +406,7 @@ class PTRV6APITests(CydnsAPITests, ResourceTestCase):
         super(PTRV6APITests, self).setUp()
 
     def test_fqdn_create(self):
-        pass
+        assert True is False
 
     def post_data(self):
         return {
@@ -418,7 +430,7 @@ class PTRV4APITests(CydnsAPITests, ResourceTestCase):
         super(PTRV4APITests, self).setUp()
 
     def test_fqdn_create(self):
-        pass
+        assert True is False
 
     def post_data(self):
         return {
