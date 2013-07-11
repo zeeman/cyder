@@ -40,7 +40,8 @@ class CydnsAPITests(object):
 
     def setUp(self):
         super(CydnsAPITests, self).setUp()
-        self.domain = create_fake_zone(random_label(), suffix='.oregonstate.edu')
+        self.domain = create_fake_zone(random_label(),
+                                       suffix='.oregonstate.edu')
 
     def test_create(self):
         resp, post_data = self.generic_create(self.post_data())
@@ -272,7 +273,7 @@ class CNAMEAPITests(CydnsAPITests, ResourceTestCase):
                 random_label(), suffix='.oregonstate.edu')
         test_soa = test_domain.soa
         test_subdomain = Domain.objects.create(
-                name=random_label() + '.' + test_domain.name, soa=test_soa)
+            name=random_label() + '.' + test_domain.name, soa=test_soa)
         test_data = {
             'fqdn': test_subdomain.name,
             'target': random_label(),
@@ -362,16 +363,6 @@ class AddressRecordV4APITests(CydnsAPITests, ResourceTestCase):
 
 class AddressRecordV6APITests(CydnsAPITests, ResourceTestCase):
     test_type = AddressRecord
-    """
-    def setUp(self):
-		test_data = {
-			'description': random_label(),
-			'ttl': 3600,
-			'ip_str': "fd00:0000:0000:0000:0000:0000:0000:0000",
-			"ip_type": 6
-		}
-		super(AddressRecordV6APITests, self).setUp(self.test_type, test_data)
-    """
 
     def post_data(self):
         return {
@@ -407,7 +398,7 @@ class PTRV6APITests(CydnsAPITests, ResourceTestCase):
 
 class PTRV4APITests(CydnsAPITests, ResourceTestCase):
     test_type = PTR
-    
+
     def setUp(self):
         Domain.objects.get_or_create(name='arpa')
         Domain.objects.get_or_create(name='in-addr.arpa')

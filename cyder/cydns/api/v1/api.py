@@ -243,7 +243,7 @@ class MXResource(CommonDNSResource, ModelResource):
     class Meta:
         always_return_data = True
         queryset = MX.objects.all()
-        fields = MX.get_api_fields() + ['views', 'label']
+        fields = MX.get_api_fields() + ['views']
         authorization = Authorization()
         allowed_methods = allowed_methods
 
