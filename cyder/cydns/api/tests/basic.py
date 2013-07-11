@@ -292,12 +292,12 @@ class CNAMEAPITests(CydnsAPITests, ResourceTestCase):
         test_soa = test_domain.soa
         test_subdomain = Domain.objects.create(
                 name=random_label() + '.' + test_domain.name, soa=test_soa)
-        data = {
-                'fqdn': test_subdomain.name,
-                'target': random_label(),
-                'ttl': random_byte()
+        test_data = {
+            'fqdn': test_subdomain.name,
+            'target': random_label(),
+            'ttl': random_byte()
         }
-        return data
+        return test_data
 
 
 class MXAPITests(CydnsAPITests, ResourceTestCase):
@@ -305,22 +305,20 @@ class MXAPITests(CydnsAPITests, ResourceTestCase):
 
     def setUp(self):
         test_data = {
-                'label': "mxlabel",
-                'server': "mxserver",
-                'priority': 123,
-                'ttl': 3600
+            'label': "mxlabel",
+            'server': "mxserver",
+            'priority': 123,
+            'ttl': 3600
         }
         super(MXAPITests, self).setUp(self.test_type, test_data)
 
     def post_data(self):
         return {
-                'fqdn': self.domain.name,
-                'label': "mxlabel",  #uncommenting this line causes tests
-                                          #to fail. This is apparently an issue
-                                          #in the self.api_client.post method
-                'server': "mxserver",
-                'priority': 123,
-                'ttl': 3600
+            'fqdn': self.domain.name,
+            'label': "mxlabel",
+            'server': "mxserver",
+            'priority': 123,
+            'ttl': 3600
         }
 
 
