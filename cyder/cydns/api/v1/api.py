@@ -119,7 +119,7 @@ class CommonDNSResource(ModelResource):
     def apply_commit(self, obj, commit_data):
         """There *has* to be a more elegant way of doing this."""
         for k, v in commit_data.iteritems():
-            if k in ('resource_uri','system'):
+            if k in ('resource_uri', 'system'):
                 continue
             setattr(obj, k, v)
         return obj
