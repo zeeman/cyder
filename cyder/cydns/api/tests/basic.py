@@ -38,19 +38,9 @@ class CydnsAPITests(object):
     object_list_url = "/dns/api/v{0}_dns/{1}/"
     object_url = "/dns/api/v{0}_dns/{1}/{2}/"
 
-    def setUp(self, test_class, test_data, use_domain=True, use_rdomain=False):
+    def setUp(self):
         super(CydnsAPITests, self).setUp()
-        View.objects.get_or_create(name='public')
-        View.objects.get_or_create(name='private')
         self.domain = create_fake_zone(random_label(), suffix='.oregonstate.edu')
-        Domain.objects.create(name=random_label() + '.' + self.domain.name,
-                              soa=self.domain.soa) #subdomain
-        reverse_domain = create_fake_zone('196.in-addr.arpa', suffix='')
-        if use_domain:
-            test_data['domain'] = self.domain
-        if use_rdomain:
-            test_data['reverse_domain'] = reverse_domain
-        test_obj, create = test_class.objects.get_or_create(**test_data)
 
     def test_create(self):
         resp, post_data = self.generic_create(self.post_data())
@@ -121,20 +111,20 @@ class CydnsAPITests(object):
         create_url = self.object_list_url.format(
             API_VERSION, str(self.test_type.__name__).lower())
         resp = self.api_client.post(create_url, format='json', data=post_data)
+        #DATA LOSS
         self.assertHttpCreated(resp)
         # Verify a new one has been added.
         self.assertEqual(self.test_type.objects.count(), obj_count + 1)
         return resp, post_data
 
     def test_changing_only_one_field(self):
-        resp, post_data = self.generic_create(self.post_data())
+        resp, post_data = self.generic_create(self.post_data()) #DATA LOSS
         new_object_url = resp.items()[2][1]
         change_post_data = {}
         change_post_data['description'] = "==DIFFERENT=="
         post_data['description'] = "==DIFFERENT=="
         resp, patch_data = self.generic_update(new_object_url,
                                                change_post_data)
-
         new_resp = self.api_client.get(new_object_url, format='json')
         updated_obj_data = json.loads(new_resp.content)
         self.compare_data(post_data, updated_obj_data)
@@ -278,14 +268,6 @@ class DomainLeakTests(ResourceTestCase):
 class CNAMEAPITests(CydnsAPITests, ResourceTestCase):
     test_type = CNAME
 
-    def setUp(self):
-        test_data = {
-            'label': random_label(),
-            'target': random_label(),
-            'ttl': random_byte()
-        }
-        super(CNAMEAPITests, self).setUp(self.test_type, test_data)
-
     def post_data(self):
         test_domain = create_fake_zone(
                 random_label(), suffix='.oregonstate.edu')
@@ -302,19 +284,10 @@ class CNAMEAPITests(CydnsAPITests, ResourceTestCase):
 
 class MXAPITests(CydnsAPITests, ResourceTestCase):
     test_type = MX
-
-    def setUp(self):
-        test_data = {
-            'label': "mxlabel",
-            'server': "mxserver",
-            'priority': 123,
-            'ttl': 3600
-        }
-        super(MXAPITests, self).setUp(self.test_type, test_data)
-
+    
     def post_data(self):
         return {
-            'fqdn': self.domain.name,
+            'fqdn': "mxlabel." + self.domain.name,
             'label': "mxlabel",
             'server': "mxserver",
             'priority': 123,
@@ -352,9 +325,6 @@ class TXTAPITests(CydnsAPITests, ResourceTestCase):
 class NameserverAPITests(CydnsAPITests, ResourceTestCase):
     test_type = Nameserver
 
-    def test_fqdn_create(self):
-        assert True is False
-
     def post_data(self):
         return {
             'server': 'g' + random_label(),
@@ -381,14 +351,6 @@ class SSHFPAPITests(CydnsAPITests, ResourceTestCase):
 class AddressRecordV4APITests(CydnsAPITests, ResourceTestCase):
     test_type = AddressRecord
 
-    def setUp(self):
-        test_data = {
-            'label': random_label(),
-            'ip_type': '4',
-            'ip_str': '196.168.1.1',
-        }
-        super(AddressRecordV4APITests, self).setUp(self.test_type, test_data)
-
     def post_data(self):
         return {
             'fqdn': self.domain.name,
@@ -401,7 +363,7 @@ class AddressRecordV4APITests(CydnsAPITests, ResourceTestCase):
 
 class AddressRecordV6APITests(CydnsAPITests, ResourceTestCase):
     test_type = AddressRecord
-
+    """
     def setUp(self):
 		test_data = {
 			'description': random_label(),
@@ -410,6 +372,7 @@ class AddressRecordV6APITests(CydnsAPITests, ResourceTestCase):
 			"ip_type": 6
 		}
 		super(AddressRecordV6APITests, self).setUp(self.test_type, test_data)
+    """
 
     def post_data(self):
         return {
@@ -431,9 +394,6 @@ class PTRV6APITests(CydnsAPITests, ResourceTestCase):
         Domain.objects.get_or_create(name='1.ip6.arpa')
         super(PTRV6APITests, self).setUp()
 
-    def test_fqdn_create(self):
-        assert True is False
-
     def post_data(self):
         return {
             'description': 'k' + random_label(),
@@ -448,15 +408,12 @@ class PTRV6APITests(CydnsAPITests, ResourceTestCase):
 
 class PTRV4APITests(CydnsAPITests, ResourceTestCase):
     test_type = PTR
-
+    
     def setUp(self):
         Domain.objects.get_or_create(name='arpa')
         Domain.objects.get_or_create(name='in-addr.arpa')
         Domain.objects.get_or_create(name='11.in-addr.arpa')
-        super(PTRV4APITests, self).setUp()
-
-    def test_fqdn_create(self):
-        assert True is False
+        super(PTRV4APITests, self).setUp() 
 
     def post_data(self):
         return {
