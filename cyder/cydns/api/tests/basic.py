@@ -288,7 +288,6 @@ class MXAPITests(CydnsAPITests, ResourceTestCase):
     def post_data(self):
         return {
             'fqdn': "mxlabel." + self.domain.name,
-            'label': "mxlabel",
             'server': "mxserver",
             'priority': 123,
             'ttl': 3600
