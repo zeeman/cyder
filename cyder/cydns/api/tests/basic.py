@@ -261,7 +261,7 @@ class DomainLeakTests(ResourceTestCase):
             # We are fucking this up on purpose.
             'fuckinup': random_label(),
             'fqdn': "c{0}.{1}.{2}".format(random_label(), random_label(),
-                                           self.domain.name),
+                                          self.domain.name),
         }
 
 
@@ -270,7 +270,7 @@ class CNAMEAPITests(CydnsAPITests, ResourceTestCase):
 
     def post_data(self):
         test_domain = create_fake_zone(
-                random_label(), suffix='.oregonstate.edu')
+            random_label(), suffix='.oregonstate.edu')
         test_soa = test_domain.soa
         test_subdomain = Domain.objects.create(
             name=random_label() + '.' + test_domain.name, soa=test_soa)
@@ -284,7 +284,7 @@ class CNAMEAPITests(CydnsAPITests, ResourceTestCase):
 
 class MXAPITests(CydnsAPITests, ResourceTestCase):
     test_type = MX
-    
+
     def post_data(self):
         return {
             'fqdn': "mxlabel." + self.domain.name,
@@ -403,7 +403,7 @@ class PTRV4APITests(CydnsAPITests, ResourceTestCase):
         Domain.objects.get_or_create(name='arpa')
         Domain.objects.get_or_create(name='in-addr.arpa')
         Domain.objects.get_or_create(name='11.in-addr.arpa')
-        super(PTRV4APITests, self).setUp() 
+        super(PTRV4APITests, self).setUp()
 
     def post_data(self):
         return {
