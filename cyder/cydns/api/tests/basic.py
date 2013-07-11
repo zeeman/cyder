@@ -111,14 +111,13 @@ class CydnsAPITests(object):
         create_url = self.object_list_url.format(
             API_VERSION, str(self.test_type.__name__).lower())
         resp = self.api_client.post(create_url, format='json', data=post_data)
-        #DATA LOSS
         self.assertHttpCreated(resp)
         # Verify a new one has been added.
         self.assertEqual(self.test_type.objects.count(), obj_count + 1)
         return resp, post_data
 
     def test_changing_only_one_field(self):
-        resp, post_data = self.generic_create(self.post_data()) #DATA LOSS
+        resp, post_data = self.generic_create(self.post_data())
         new_object_url = resp.items()[2][1]
         change_post_data = {}
         change_post_data['description'] = "==DIFFERENT=="
@@ -344,7 +343,7 @@ class SSHFPAPITests(CydnsAPITests, ResourceTestCase):
             'fqdn': 'h' + random_label() + "." + self.domain.name,
             'algorithm_number': 1,
             'fingerprint_type': 1,
-            'key': random_label()
+            'key': '9d97e98f8af710c7e7fe703abc8f639e0ee50222'
         }
 
 
