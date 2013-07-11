@@ -42,7 +42,7 @@ class CydnsAPITests(object):
         super(CydnsAPITests, self).setUp()
         View.objects.get_or_create(name='public')
         View.objects.get_or_create(name='private')
-        self.domain = create_fake_zone(random_label(), suffix='oregonstate.edu')
+        self.domain = create_fake_zone(random_label(), suffix='.oregonstate.edu')
         Domain.objects.create(name=random_label() + '.' + self.domain.name,
                               soa=self.domain.soa) #subdomain
         reverse_domain = create_fake_zone('196.in-addr.arpa', suffix='')
@@ -134,6 +134,7 @@ class CydnsAPITests(object):
         post_data['description'] = "==DIFFERENT=="
         resp, patch_data = self.generic_update(new_object_url,
                                                change_post_data)
+
         new_resp = self.api_client.get(new_object_url, format='json')
         updated_obj_data = json.loads(new_resp.content)
         self.compare_data(post_data, updated_obj_data)
@@ -277,25 +278,49 @@ class DomainLeakTests(ResourceTestCase):
 class CNAMEAPITests(CydnsAPITests, ResourceTestCase):
     test_type = CNAME
 
-    def post_data(self):
-        return {
-            'description': random_label(),
-            'ttl': random_byte(),
-            'fqdn': 'd' + random_label() + "." + self.domain.name,
-            'target': random_label()
+    def setUp(self):
+        test_data = {
+            'label': random_label(),
+            'target': random_label(),
+            'ttl': random_byte()
         }
+        super(CNAMEAPITests, self).setUp(self.test_type, test_data)
+
+    def post_data(self):
+        test_domain = create_fake_zone(
+                random_label(), suffix='.oregonstate.edu')
+        test_soa = test_domain.soa
+        test_subdomain = Domain.objects.create(
+                name=random_label() + '.' + test_domain.name, soa=test_soa)
+        data = {
+                'fqdn': test_subdomain.name,
+                'target': random_label(),
+                'ttl': random_byte()
+        }
+        return data
 
 
 class MXAPITests(CydnsAPITests, ResourceTestCase):
     test_type = MX
 
+    def setUp(self):
+        test_data = {
+                'label': "mxlabel",
+                'server': "mxserver",
+                'priority': 123,
+                'ttl': 3600
+        }
+        super(MXAPITests, self).setUp(self.test_type, test_data)
+
     def post_data(self):
         return {
-            'description': random_label(),
-            'ttl': random_byte(),
-            'fqdn':  'e' + random_label() + "." + self.domain.name,
-            'server': random_label(),
-            'priority': 123,
+                'fqdn': self.domain.name,
+                'label': "mxlabel",  #uncommenting this line causes tests
+                                          #to fail. This is apparently an issue
+                                          #in the self.api_client.post method
+                'server': "mxserver",
+                'priority': 123,
+                'ttl': 3600
         }
 
 
@@ -380,10 +405,13 @@ class AddressRecordV6APITests(CydnsAPITests, ResourceTestCase):
     test_type = AddressRecord
 
     def setUp(self):
-        #Domain.objects.get_or_create(name='arap')
-        #Domain.objects.get_or_create(name='ipv6.arap')
-        #Domain.objects.get_or_create(name='1.ipv6.arap')
-        super(AddressRecordV6APITests, self).setUp()
+		test_data = {
+			'description': random_label(),
+			'ttl': 3600,
+			'ip_str': "fd00:0000:0000:0000:0000:0000:0000:0000",
+			"ip_type": 6
+		}
+		super(AddressRecordV6APITests, self).setUp(self.test_type, test_data)
 
     def post_data(self):
         return {

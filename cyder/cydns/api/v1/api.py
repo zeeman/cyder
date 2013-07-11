@@ -119,9 +119,7 @@ class CommonDNSResource(ModelResource):
     def apply_commit(self, obj, commit_data):
         """There *has* to be a more elegant way of doing this."""
         for k, v in commit_data.iteritems():
-            if k == 'resource_uri':
-                continue
-            if k == 'system':
+            if k in ('resource_uri','system'):
                 continue
             setattr(obj, k, v)
         return obj
@@ -245,7 +243,7 @@ class MXResource(CommonDNSResource, ModelResource):
     class Meta:
         always_return_data = True
         queryset = MX.objects.all()
-        fields = MX.get_api_fields() + ['views']
+        fields = MX.get_api_fields() + ['views', 'label']
         authorization = Authorization()
         allowed_methods = allowed_methods
 
