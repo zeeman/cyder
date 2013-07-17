@@ -6,8 +6,6 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from tastypie import fields
 from tastypie.resources import ModelResource
 
-import reversion
-
 from cyder.cydns.utils import ensure_label_domain, prune_tree
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
@@ -121,9 +119,7 @@ class CommonDNSResource(ModelResource):
     def apply_commit(self, obj, commit_data):
         """There *has* to be a more elegant way of doing this."""
         for k, v in commit_data.iteritems():
-            if k == 'resource_uri':
-                continue
-            if k == 'system':
+            if k in ('resource_uri', 'system'):
                 continue
             setattr(obj, k, v)
         return obj
@@ -170,7 +166,6 @@ class CommonDNSResource(ModelResource):
         try:
             bundle.obj.full_clean()
             bundle.obj.save()
-            reversion.set_comment(comment)
         except ValidationError, e:
             if 'domain' in bundle.data:
                 prune_tree(bundle.data['domain'])
@@ -179,7 +174,7 @@ class CommonDNSResource(ModelResource):
         except Exception, e:
             if 'domain' in bundle.data:
                 prune_tree(bundle.data['domain'])
-            bundle.errors['error_messages'] = "Very bad error."
+            bundle.errors['error_messages'] = e
             self.error_response(bundle.errors, request)
 
         self.update_views(bundle.obj, views)

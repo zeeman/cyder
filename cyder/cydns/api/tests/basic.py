@@ -1,7 +1,7 @@
 from tastypie.test import ResourceTestCase
 
-from cyder.cydns.tests.test_views_template import random_label
-from cyder.cydns.tests.test_views_template import random_byte
+from cyder.base.tests.test_views_template import random_label
+from cyder.base.tests.test_views_template import random_byte
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.domain.models import Domain
@@ -13,6 +13,8 @@ from cyder.cydns.srv.models import SRV
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.view.models import View
+
+from cyder.cydns.tests.utils import create_fake_zone
 
 import json as json
 
@@ -33,14 +35,13 @@ def build_sample_domain():
 
 
 class CydnsAPITests(object):
-    object_list_url = "/cydns/api/v{0}_dns/{1}/"
-    object_url = "/cydns/api/v{0}_dns/{1}/{2}/"
+    object_list_url = "/dns/api/v{0}_dns/{1}/"
+    object_url = "/dns/api/v{0}_dns/{1}/{2}/"
 
     def setUp(self):
         super(CydnsAPITests, self).setUp()
-        self.domain = build_sample_domain()
-        View(name='public').save()
-        View(name='private').save()
+        self.domain = create_fake_zone(random_label(),
+                                       suffix='.oregonstate.edu')
 
     def test_create(self):
         resp, post_data = self.generic_create(self.post_data())
@@ -171,8 +172,8 @@ class CydnsAPITests(object):
 
 class MangleTests(ResourceTestCase):
     test_type = CNAME
-    object_list_url = "/cydns/api/v{0}_dns/{1}/"
-    object_url = "/cydns/api/v{0}_dns/{1}/{2}/"
+    object_list_url = "/dns/api/v{0}_dns/{1}/"
+    object_url = "/dns/api/v{0}_dns/{1}/{2}/"
 
     def setUp(self):
         super(MangleTests, self).setUp()
@@ -235,8 +236,8 @@ class MangleTests(ResourceTestCase):
 
 class DomainLeakTests(ResourceTestCase):
     test_type = CNAME
-    object_list_url = "/cydns/api/v{0}_dns/{1}/"
-    object_url = "/cydns/api/v{0}_dns/{1}/{2}/"
+    object_list_url = "/dns/api/v{0}_dns/{1}/"
+    object_url = "/dns/api/v{0}_dns/{1}/{2}/"
 
     def setUp(self):
         super(DomainLeakTests, self).setUp()
@@ -259,8 +260,8 @@ class DomainLeakTests(ResourceTestCase):
         return {
             # We are fucking this up on purpose.
             'fuckinup': random_label(),
-            'fqdn': "c{0}.{1}.{2)}".format(random_label(), random_label(),
-                                           self.domain.name),
+            'fqdn': "c{0}.{1}.{2}".format(random_label(), random_label(),
+                                          self.domain.name),
         }
 
 
@@ -268,12 +269,17 @@ class CNAMEAPITests(CydnsAPITests, ResourceTestCase):
     test_type = CNAME
 
     def post_data(self):
-        return {
-            'description': random_label(),
-            'ttl': random_byte(),
-            'fqdn': 'd' + random_label() + "." + self.domain.name,
-            'target': random_label()
+        test_domain = create_fake_zone(
+            random_label(), suffix='.oregonstate.edu')
+        test_soa = test_domain.soa
+        test_subdomain = Domain.objects.create(
+            name=random_label() + '.' + test_domain.name, soa=test_soa)
+        test_data = {
+            'fqdn': test_subdomain.name,
+            'target': random_label(),
+            'ttl': random_byte()
         }
+        return test_data
 
 
 class MXAPITests(CydnsAPITests, ResourceTestCase):
@@ -281,12 +287,10 @@ class MXAPITests(CydnsAPITests, ResourceTestCase):
 
     def post_data(self):
         return {
-            'description': random_label(),
-            'ttl': random_byte(),
-            'fqdn':  'e' + random_label() + "." + self.domain.name,
-            'server': random_label(),
+            'fqdn': "mxlabel." + self.domain.name,
+            'server': "mxserver",
             'priority': 123,
-            'ttl': 213
+            'ttl': 3600
         }
 
 
@@ -320,9 +324,6 @@ class TXTAPITests(CydnsAPITests, ResourceTestCase):
 class NameserverAPITests(CydnsAPITests, ResourceTestCase):
     test_type = Nameserver
 
-    def test_fqdn_create(self):
-        pass
-
     def post_data(self):
         return {
             'server': 'g' + random_label(),
@@ -342,35 +343,25 @@ class SSHFPAPITests(CydnsAPITests, ResourceTestCase):
             'fqdn': 'h' + random_label() + "." + self.domain.name,
             'algorithm_number': 1,
             'fingerprint_type': 1,
-            'key': random_label()
+            'key': '9d97e98f8af710c7e7fe703abc8f639e0ee50222'
         }
 
 
-class AdderessRecordV4APITests(CydnsAPITests, ResourceTestCase):
+class AddressRecordV4APITests(CydnsAPITests, ResourceTestCase):
     test_type = AddressRecord
-
-    def setUp(self):
-        super(AdderessRecordV4APITests, self).setUp()
 
     def post_data(self):
         return {
-            'description': random_label(),
+            'fqdn': self.domain.name,
+            'ip_type': '4',
+            'ip_str': '196.168.1.2',
             'ttl': random_byte(),
-            'fqdn': 'i' + random_label() + "." + self.domain.name,
-            'ip_str': "11.{0}.{1}.{2}".format(
-                random_byte(), random_byte(), random_byte()),
-            'ip_type': '4'
+            'description': random_label(),
         }
 
 
-class AdderessRecordV6APITests(CydnsAPITests, ResourceTestCase):
+class AddressRecordV6APITests(CydnsAPITests, ResourceTestCase):
     test_type = AddressRecord
-
-    def setUp(self):
-        #Domain.objects.get_or_create(name='arap')
-        #Domain.objects.get_or_create(name='ipv6.arap')
-        #Domain.objects.get_or_create(name='1.ipv6.arap')
-        super(AdderessRecordV6APITests, self).setUp()
 
     def post_data(self):
         return {
@@ -392,9 +383,6 @@ class PTRV6APITests(CydnsAPITests, ResourceTestCase):
         Domain.objects.get_or_create(name='1.ip6.arpa')
         super(PTRV6APITests, self).setUp()
 
-    def test_fqdn_create(self):
-        pass
-
     def post_data(self):
         return {
             'description': 'k' + random_label(),
@@ -415,9 +403,6 @@ class PTRV4APITests(CydnsAPITests, ResourceTestCase):
         Domain.objects.get_or_create(name='in-addr.arpa')
         Domain.objects.get_or_create(name='11.in-addr.arpa')
         super(PTRV4APITests, self).setUp()
-
-    def test_fqdn_create(self):
-        pass
 
     def post_data(self):
         return {
