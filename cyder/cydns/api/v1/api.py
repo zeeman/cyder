@@ -391,7 +391,7 @@ class StaticInterfaceResource(CommonDNSResource, ObjectListMixin,
         kv = []
         if 'key' in bundle.data and 'value' in bundle.data:
             # It's key and value. Nothing else is allowed in the bundle.
-            if set('key', 'value') != set(bundle.data):
+            if set(('key', 'value')) != set(bundle.data):
                 error = _("key and value must be the only keys in your request"
                            "when you are updating KV pairs.")
                 bundle.errors['keyvalue'] = error

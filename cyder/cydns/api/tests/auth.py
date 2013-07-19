@@ -161,12 +161,10 @@ class CydnsAPIAuthTests(object):
 
     def authtest_update(self, user):
         creds = self.get_credentials(user)
-        post_data = self.post_data()
         resp, post_data = self.generic_create_auth(self.post_data(),
                 user, creds)
         if self.has_perm(user, cyder.ACTION_UPDATE):
             new_object_url = resp.items()[2][1]
-            patch_data = self.post_data()
             update_resp, patch_data = self.generic_update_auth(new_object_url,
                     self.post_data(), user, creds)
             patch_resp = self.api_client.get(new_object_url, format='json',
