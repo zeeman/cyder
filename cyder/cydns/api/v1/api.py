@@ -1,5 +1,6 @@
 from gettext import gettext as _
 import json as json
+import re
 
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
@@ -8,6 +9,7 @@ from tastypie.authentication import ApiKeyAuthentication
 from tastypie.resources import ModelResource
 
 from cyder.core.system.models import System
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.api.v1.auth import CyderAuthorization
 from cyder.cydns.cname.models import CNAME
@@ -344,13 +346,16 @@ class PTRResource(CommonDNSResource, ObjectListMixin, ModelResource):
 
 v1_dns_api.register(PTRResource())
 
-"""
+
 class SystemResource(ModelResource):
     class Meta:
         queryset = System.objects.all()
         resource_name = 'system'
         authentication = ApiKeyAuthentication()
         authorization = CyderAuthorization()
+
+
+v1_dns_api.register(SystemResource())
 
 
 class StaticInterfaceResource(CommonDNSResource, ObjectListMixin,
@@ -431,7 +436,7 @@ class StaticInterfaceResource(CommonDNSResource, ObjectListMixin,
 
 v1_dns_api.register(StaticInterfaceResource())
 
-"""
+
 """
 class XXXResource(CommonDNSResource, ObjectListMixin, ModelResource):
     class Meta:

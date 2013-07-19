@@ -9,18 +9,19 @@ from cyder.base.tests.test_views_template import random_label
 from cyder.base.tests.test_views_template import random_byte
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.cyuser.backends import _has_perm
-from cyder.cydns.cname.models import CNAME
+from cyder.core.system.models import System
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.address_record.models import AddressRecord
+from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.mx.models import MX
-from cyder.cydns.ptr.models import PTR
 from cyder.cydns.nameserver.models import Nameserver
+from cyder.cydns.ptr.models import PTR
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.srv.models import SRV
-from cyder.cydns.txt.models import TXT
 from cyder.cydns.sshfp.models import SSHFP
+from cyder.cydns.txt.models import TXT
 from cyder.cydns.tests.utils import create_fake_zone
-from cyder.cydns.view.models import View
 
 API_VERSION = '1'
 
@@ -411,8 +412,6 @@ class PTRV4APITests(CydnsAPIAuthTests, ResourceTestCase):
         }
 
 
-"""
-Need to hook up system resource before this will work.
 class StaticIntrV4APITests(CydnsAPIAuthTests, ResourceTestCase):
     test_type = StaticInterface
 
@@ -421,37 +420,55 @@ class StaticIntrV4APITests(CydnsAPIAuthTests, ResourceTestCase):
         Domain.objects.get_or_create(name='in-addr.arpa')
         Domain.objects.get_or_create(name='11.in-addr.arpa')
         super(StaticIntrV4APITests, self).setUp()
-        self.s = System(hostname="foobar")
+        self.s = System(name="foobar")
         self.s.save()
 
     def compare_data(self, old_data, new_obj_data):
         for key in old_data.keys():
-            if key == 'system_hostname':
+            if key == 'system_name':
                 self.assertEqual(old_data[key],
-                                 new_obj_data['system']['hostname'])
+                                 new_obj_data['system']['name'])
                 continue
             if key in ('iname', 'system'):
                 continue  # StaticInterface needs this done. Too lazy to factor
                           # a comparison function out
             self.assertEqual(old_data[key], new_obj_data[key])
 
-    def test_create_hostname(self):
+    def test_create_hostname_guest(self):
+        self.authtest_create_hostname("test_guest")
+
+    def test_create_hostname_user(self):
+        self.authtest_create_hostname("test_user")
+
+    def test_create_hostname_admin(self):
+        self.authtest_create_hostname("test_admin")
+
+    def test_create_hostname_superuser(self):
+        self.authtest_create_hostname("test_superuser")
+
+    def authtest_create_hostname(self, user):
+        creds = self.get_credentials(user)
         post_data = self.post_data()
-        del post_data['system']
-        post_data['system_hostname'] = self.s.hostname
-        resp, post_data = self.generic_create(post_data)
-        new_object_url = resp.items()[2][1]
-        new_resp = self.api_client.get(new_object_url, format='json')
-        self.assertValidJSONResponse(new_resp)
-        new_obj_data = json.loads(new_resp.content)
-        self.compare_data(post_data, new_obj_data)
+        #del post_data['system']
+        #post_data['system_name'] = self.s.name
+        resp, post_data = self.generic_create_auth(post_data, user, creds)
+        if self.has_perm(user, cyder.ACTION_CREATE):
+            new_object_url = resp.items()[2][1]
+            new_resp = self.api_client.get(new_object_url, format='json',
+                    authentication=creds)
+            self.assertValidJSONResponse(new_resp)
+            new_obj_data = json.loads(new_resp.content)
+            self.compare_data(post_data, new_obj_data)
+        else:
+            self.assertHttpUnauthorized(resp)
 
     def post_data(self):
         return {
             'description': 'm' + random_label(),
             'ttl': random_byte(),
             'mac': '11:22:33:44:55:00',
-            'system': '/tasty/systems/system/{0}/'.format(self.s.pk),
+            #'system': '/tasty/systems/system/{0}/'.format(self.s.pk),
+            'system': self.object_url.format(API_VERSION, 'system', self.s.pk),
             'fqdn': 'a' + random_label() + "." + self.domain.name,
             'iname': 'eth2.4',
             'dhcp_enabled': False,
@@ -469,7 +486,7 @@ class StaticIntrV6APITests(CydnsAPIAuthTests, ResourceTestCase):
         Domain.objects.get_or_create(name='ip6.arpa')
         Domain.objects.get_or_create(name='2.ip6.arpa')
         super(StaticIntrV6APITests, self).setUp()
-        self.s = System(hostname="foobar")
+        self.s = System(name="foobar")
         self.s.save()
 
     def compare_data(self, old_data, new_obj_data):
@@ -488,9 +505,8 @@ class StaticIntrV6APITests(CydnsAPIAuthTests, ResourceTestCase):
             'dhcp_enabled': True,
             'dns_enabled': True,
             'mac': '11:22:33:44:55:00',
-            'system': '/tasty/systems/system/{0}/'.format(self.s.pk),
+            'system': self.object_url.format(API_VERSION, 'system', self.s.pk),
             'ip_str': "2000:a{0}:a{1}:a{2}::".format(
                 random_byte(), random_byte(), random_byte()),
             'ip_type': '6'
         }
-"""

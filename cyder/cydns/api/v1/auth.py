@@ -2,6 +2,7 @@ from tastypie.authorization import Authorization
 
 import cyder
 from cyder.core.cyuser.backends import _has_perm
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
@@ -31,6 +32,7 @@ class CyderAuthorization(Authorization):
             'srv': SRV,
             'sshfp': SSHFP,
             'txt': TXT,
+            'staticinterface': StaticInterface,
         }[string.lower()]
 
     def is_authorized(self, request, object=None):
