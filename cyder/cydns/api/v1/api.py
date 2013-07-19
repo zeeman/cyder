@@ -4,21 +4,22 @@ import json as json
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 from tastypie import fields
+from tastypie.authentication import ApiKeyAuthentication
 from tastypie.resources import ModelResource
 
-from cyder.cydns.utils import ensure_label_domain, prune_tree
-from cyder.cydns.domain.models import Domain
+from cyder.core.system.models import System
 from cyder.cydns.address_record.models import AddressRecord
-from cyder.cydns.txt.models import TXT
-from cyder.cydns.ptr.models import PTR
-from cyder.cydns.srv.models import SRV
+from cyder.cydns.api.v1.auth import CyderAuthorization
+from cyder.cydns.cname.models import CNAME
+from cyder.cydns.domain.models import Domain
 from cyder.cydns.mx.models import MX
 from cyder.cydns.nameserver.models import Nameserver
+from cyder.cydns.ptr.models import PTR
+from cyder.cydns.srv.models import SRV
 from cyder.cydns.sshfp.models import SSHFP
-from cyder.cydns.cname.models import CNAME
+from cyder.cydns.txt.models import TXT
+from cyder.cydns.utils import ensure_label_domain, prune_tree
 from cyder.cydns.view.models import View
-
-from tastypie.authorization import Authorization
 
 from tastypie.api import Api
 
@@ -208,7 +209,8 @@ class CNAMEResource(CommonDNSResource, ObjectListMixin, ModelResource):
         always_return_data = True
         queryset = CNAME.objects.all()
         fields = CNAME.get_api_fields() + ['views']
-        authorization = Authorization()
+        authentication = ApiKeyAuthentication()
+        authorization = CyderAuthorization()
         allowed_methods = allowed_methods
 
 
@@ -220,7 +222,8 @@ class TXTResource(CommonDNSResource, ObjectListMixin, ModelResource):
         always_return_data = True
         queryset = TXT.objects.all()
         fields = TXT.get_api_fields() + ['views']
-        authorization = Authorization()
+        authentication = ApiKeyAuthentication()
+        authorization = CyderAuthorization()
         allowed_methods = allowed_methods
 
 
@@ -232,7 +235,8 @@ class SRVResource(CommonDNSResource, ModelResource):
         always_return_data = True
         queryset = SRV.objects.all()
         fields = SRV.get_api_fields() + ['views']
-        authorization = Authorization()
+        authentication = ApiKeyAuthentication()
+        authorization = CyderAuthorization()
         allowed_methods = allowed_methods
 
 
@@ -244,7 +248,8 @@ class MXResource(CommonDNSResource, ModelResource):
         always_return_data = True
         queryset = MX.objects.all()
         fields = MX.get_api_fields() + ['views']
-        authorization = Authorization()
+        authentication = ApiKeyAuthentication()
+        authorization = CyderAuthorization()
         allowed_methods = allowed_methods
 
 
@@ -256,7 +261,8 @@ class SSHFPResource(CommonDNSResource, ObjectListMixin, ModelResource):
         always_return_data = True
         queryset = SSHFP.objects.all()
         fields = SSHFP.get_api_fields() + ['views']
-        authorization = Authorization()
+        authentication = ApiKeyAuthentication()
+        authorization = CyderAuthorization()
         allowed_methods = allowed_methods
 
 
@@ -268,7 +274,8 @@ class AddressRecordResource(CommonDNSResource, ObjectListMixin, ModelResource):
         always_return_data = True
         queryset = AddressRecord.objects.all()
         fields = AddressRecord.get_api_fields() + ['views']
-        authorization = Authorization()
+        authentication = ApiKeyAuthentication()
+        authorization = CyderAuthorization()
         allowed_methods = allowed_methods
 
 
@@ -296,7 +303,8 @@ class NameserverResource(CommonDNSResource, ObjectListMixin):
         always_return_data = True
         queryset = Nameserver.objects.all()
         fields = Nameserver.get_api_fields() + ['views']
-        authorization = Authorization()
+        authentication = ApiKeyAuthentication()
+        authorization = CyderAuthorization()
         allowed_methods = allowed_methods
 
 v1_dns_api.register(NameserverResource())
@@ -329,14 +337,22 @@ class PTRResource(CommonDNSResource, ObjectListMixin, ModelResource):
         always_return_data = True
         queryset = PTR.objects.all()
         fields = PTR.get_api_fields() + ['views']
-        authorization = Authorization()
+        authentication = ApiKeyAuthentication()
+        authorization = CyderAuthorization()
         allowed_methods = allowed_methods
 
 
 v1_dns_api.register(PTRResource())
 
-
 """
+class SystemResource(ModelResource):
+    class Meta:
+        queryset = System.objects.all()
+        resource_name = 'system'
+        authentication = ApiKeyAuthentication()
+        authorization = CyderAuthorization()
+
+
 class StaticInterfaceResource(CommonDNSResource, ObjectListMixin,
                                 ModelResource):
     system = fields.ToOneField(SystemResource, 'system', null=False, full=True)
@@ -408,12 +424,12 @@ class StaticInterfaceResource(CommonDNSResource, ObjectListMixin,
         always_return_data = True
         queryset = StaticInterface.objects.all()
         fields = StaticInterface.get_api_fields() + ['views', 'system']
-        authorization = Authorization()
+        authentication = ApiKeyAuthentication()
+        authorization = CyderAuthorization()
         allowed_methods = allowed_methods
         resource_name = 'staticinterface'
 
 v1_dns_api.register(StaticInterfaceResource())
-
 
 """
 """
@@ -422,7 +438,8 @@ class XXXResource(CommonDNSResource, ObjectListMixin, ModelResource):
         always_return_data = True
         queryset = XXX.objects.all()
         fields = XXX.get_api_fields() + ['views']
-        authorization = Authorization()
+        authentication = ApiKeyAuthentication()
+        authorization = CyderAuthorization()
         allowed_methods = allowed_methods
 
 v1_dns_api.register(XXXResource())

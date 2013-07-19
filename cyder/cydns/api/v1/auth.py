@@ -1,4 +1,3 @@
-from django.core.urlresolvers import resolve
 from tastypie.authorization import Authorization
 
 import cyder
@@ -22,7 +21,7 @@ class CyderAuthorization(Authorization):
 
     def str_to_class(self, string):
         return {
-            'address_record': AddressRecord,
+            'addressrecord': AddressRecord,
             'cname': CNAME,
             'domain': Domain,
             'mx': MX,

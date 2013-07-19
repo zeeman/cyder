@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth.models import User
 from tastypie.models import ApiKey
 from tastypie.test import ResourceTestCase
@@ -19,8 +21,6 @@ from cyder.cydns.txt.models import TXT
 from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.tests.utils import create_fake_zone
 from cyder.cydns.view.models import View
-
-import json as json
 
 API_VERSION = '1'
 
@@ -72,6 +72,9 @@ class CydnsAPIAuthTests(object):
     def test_delete_user(self):
         self.authtest_delete("test_user")
 
+    def test_views_user(self):
+        self.authtest_views("test_user")
+
     def test_create_admin(self):
         self.authtest_create("test_admin")
 
@@ -84,6 +87,9 @@ class CydnsAPIAuthTests(object):
     def test_delete_admin(self):
         self.authtest_delete("test_admin")
 
+    def test_views_admin(self):
+        self.authtest_views("test_admin")
+
     def test_create_superuser(self):
         self.authtest_create("test_superuser")
 
@@ -95,6 +101,9 @@ class CydnsAPIAuthTests(object):
 
     def test_delete_superuser(self):
         self.authtest_delete("test_superuser")
+
+    def test_views_superuser(self):
+        self.authtest_views("test_superuser")
 
     #Begin helper methods.
     def get_credentials(self, user):
@@ -205,6 +214,52 @@ class CydnsAPIAuthTests(object):
         else:
             self.assertHttpUnauthorized(resp)
             self.assertEqual(self.test_type.objects.count(), obj_count)
+
+    def authtest_views(self, user):
+        creds = self.get_credentials(user)
+        post_data = self.post_data()
+        post_data['views'] = ['public']
+        obj_count = self.test_type.objects.count()
+        create_url = self.object_list_url.format(
+                API_VERSION, str(self.test_type.__name__).lower())
+        resp = self.api_client.post(create_url, format='json', data=post_data,
+                authentication=creds)
+        self.assertHttpCreated(resp)
+        self.assertEqual(self.test_type.objects.count(), obj_count + 1)
+
+        new_object_url = resp.items()[2][1]
+        new_resp = self.api_client.get(new_object_url, format='json',
+                authentication=creds)
+        self.assertValidJSONResponse(new_resp)
+        new_obj_data = json.loads(new_resp.content)
+        self.assertTrue('views' in new_obj_data)
+        self.assertEqual(new_obj_data['views'], ['public'])
+
+        views = ['public', 'private']
+        post_data = {'views': views}
+        obj_count = self.test_type.objects.count()
+        resp, patch_data = self.generic_update_auth(new_object_url, post_data,
+                user, creds)
+        self.assertEqual(self.test_type.objects.count(), obj_count)
+        self.assertTrue('views' in new_obj_data)
+        new_resp = self.api_client.get(new_object_url, format='json',
+                authentication=creds)
+        updated_obj_data = json.loads(new_resp.content)
+        for view_name in updated_obj_data['views']:
+            self.assertTrue(view_name in views)
+
+        views = ['private']
+        post_data = {'views': ['no-public']}
+        obj_count = self.test_type.objects.count()
+        resp, patch_data = self.generic_update_auth(new_object_url, post_data,
+                user, creds)
+        self.assertEqual(self.test_type.objects.count(), obj_count)
+        self.assertTrue('views' in new_obj_data)
+        new_resp = self.api_client.get(new_object_url, format='json',
+                authentication=creds)
+        updated_obj_data = json.loads(new_resp.content)
+        for view_name in updated_obj_data['views']:
+            self.assertTrue(view_name in views)
 
 
 class CNAMEAPITests(CydnsAPIAuthTests, ResourceTestCase):
