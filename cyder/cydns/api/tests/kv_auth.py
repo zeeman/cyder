@@ -5,10 +5,14 @@ from tastypie.models import ApiKey
 from tastypie.test import ResourceTestCase
 
 import cyder
+from cyder.base.tests.test_views_template import random_byte
 from cyder.base.tests.test_views_template import random_label
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.cyuser.backends import _has_perm
+from cyder.core.system.models import System
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydns.domain.models import Domain
+from cyder.cydns.tests.utils import create_fake_zone
 
 API_VERSION = 1
 
@@ -19,6 +23,8 @@ class KVAPIAuthTests(object):
 
     def setUp(self):
         super(KVAPIAuthTests, self).setUp()
+        self.domain = create_fake_zone(random_label(),
+                suffix='.oregonstate.edu')
 
     #Start helper functions.
     def get_credentials(self, user):
@@ -41,7 +47,6 @@ class KVAPIAuthTests(object):
                 API_VERSION, str(self.test_type.__name__).lower())
         resp = self.api_client.post(create_url, format='json', data=post_data,
                 authentication=creds)
-        import pdb; pdb.set_trace()
         if self.has_perm(user, cyder.ACTION_CREATE):
             self.assertHttpCreated(resp)
             self.assertEqual(self.test_type.objects.count(), obj_count + 1)
@@ -76,7 +81,7 @@ class KVAPIAuthTests(object):
 
     def authtest_update(self, user):
         creds = self.get_credentials(user)
-        resp, post_data = self.generic_create_auth(self.post_data(),
+        resp, post_data = self.generic_create_auth(self.setup_data(),
                 user, creds)
         if self.has_perm(user, cyder.ACTION_UPDATE):
             new_object_url = resp.items()[2][1]
@@ -99,7 +104,7 @@ class KVAPIAuthTests(object):
     def authtest_delete(self, user):
         creds = self.get_credentials(user)
         obj_count = self.test_type.objects.count()
-        resp, post_data = self.generic_create_auth(self.post_data(),
+        resp, post_data = self.generic_create_auth(self.setup_data(),
                 user, creds)
         if self.has_perm(user, cyder.ACTION_DELETE):
             new_object_url = resp.items()[2][1]
@@ -125,7 +130,7 @@ class KVAPIAuthTests(object):
 
     def test_bad_value_update(self):
         creds = self.get_credentials("test_superuser")
-        good_post_data = self.good_post_data()
+        good_post_data = self.setup_data()
         resp, post_data = self.generic_create_auth(good_post_data,
                 "test_superuser", creds)
         self.assertHttpCreated(resp)
@@ -137,10 +142,32 @@ class KVAPIAuthTests(object):
                 authentication=creds)
         self.assertValidJSONResponse(new_resp)
         new_obj_data = json.loads(new_resp.content)
-        self.assertEqual(good_post_data, new_obj_data)
+        assert "interface_type" not in new_obj_data
 
 class StaticIntrKVAPITests(KVAPIAuthTests, ResourceTestCase):
     test_type = StaticInterface
+
+    def setUp(self):
+        Domain.objects.get_or_create(name='arpa')
+        Domain.objects.get_or_create(name='in-addr.arpa')
+        Domain.objects.get_or_create(name='11.in-addr.arpa')
+        super(StaticIntrKVAPITests, self).setUp()
+        self.s = System(name="foobar")
+        self.s.save()
+
+    def setup_data(self):
+        return {
+            'description': 'm' + random_label(),
+            'ttl': random_byte(),
+            'mac': '11:22:33:44:55:00',
+            'system': self.object_url.format(API_VERSION, 'system', self.s.pk),
+            'fqdn': 'a' + random_label() + '.' + self.domain.name,
+            'iname': 'eth2.4',
+            'dhcp_enabled': False,
+            'dns_enabled': True,
+            'ip_str': "11.255.{0}.{1}".format(random_byte(), random_byte()),
+            'ip_type': '4'
+        }
 
     def post_data(self):
         return {
