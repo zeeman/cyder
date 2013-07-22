@@ -358,7 +358,7 @@ v1_dns_api.register(SystemResource())
 
 
 class StaticInterfaceResource(CommonDNSResource, ObjectListMixin,
-                                ModelResource):
+                              ModelResource):
     system = fields.ToOneField(SystemResource, 'system', null=False, full=True)
 
     def hydrate(self, bundle):
@@ -372,8 +372,8 @@ class StaticInterfaceResource(CommonDNSResource, ObjectListMixin,
                 bundle.data['system'] = system
             except ObjectDoesNotExist:
                 bundle.errors['system'] = _("Couldn't find system with "
-                                            "hostname {0}".format(
-                                            system_hostname))
+                                            "hostname {0}"
+                                            .format(system_hostname))
         super(StaticInterfaceResource, self).hydrate(bundle)
         return bundle
 
@@ -392,7 +392,7 @@ class StaticInterfaceResource(CommonDNSResource, ObjectListMixin,
             # It's key and value. Nothing else is allowed in the bundle.
             if set(('key', 'value')) != set(bundle.data):
                 error = _("key and value must be the only keys in your request"
-                           "when you are updating KV pairs.")
+                          "when you are updating KV pairs.")
                 bundle.errors['keyvalue'] = error
                 return []
             else:

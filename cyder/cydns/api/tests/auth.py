@@ -46,8 +46,8 @@ class CydnsAPIAuthTests(object):
 
     def setUp(self):
         super(CydnsAPIAuthTests, self).setUp()
-        self.domain = create_fake_zone(random_label(),
-                suffix='.oregonstate.edu')
+        self.domain = create_fake_zone(
+            random_label(), suffix='.oregonstate.edu')
 
     def test_create_guest(self):
         self.authtest_create("test_guest")
@@ -119,14 +119,14 @@ class CydnsAPIAuthTests(object):
     def has_perm(self, user, action):
         user_obj = User.objects.get(username=user)
         return _has_perm(user_obj, Ctnr.objects.get(pk=9999),
-                action=action, obj_class=self.test_type)
+                         action=action, obj_class=self.test_type)
 
     def generic_create_auth(self, post_data, user, creds):
         obj_count = self.test_type.objects.count()
         create_url = self.object_list_url.format(
-                API_VERSION, str(self.test_type.__name__).lower())
+            API_VERSION, str(self.test_type.__name__).lower())
         resp = self.api_client.post(create_url, format='json', data=post_data,
-                authentication=creds)
+                                    authentication=creds)
         if self.has_perm(user, cyder.ACTION_CREATE):
             self.assertHttpCreated(resp)
             self.assertEqual(self.test_type.objects.count(), obj_count + 1)
@@ -138,7 +138,7 @@ class CydnsAPIAuthTests(object):
     def generic_update_auth(self, patch_url, patch_data, user, creds):
         obj_count = self.test_type.objects.count()
         resp = self.api_client.patch(patch_url, format='json', data=patch_data,
-                authentication=creds)
+                                     authentication=creds)
         if self.has_perm(user, cyder.ACTION_UPDATE):
             self.assertHttpAccepted(resp)
             self.assertEqual(self.test_type.objects.count(), obj_count)
@@ -149,65 +149,65 @@ class CydnsAPIAuthTests(object):
 
     def authtest_create(self, user):
         creds = self.get_credentials(user)
-        resp, post_data = self.generic_create_auth(self.post_data(),
-                user, creds)
+        resp, post_data = self.generic_create_auth(
+            self.post_data(), user, creds)
         if self.has_perm(user, cyder.ACTION_CREATE):
             new_object_url = resp.items()[2][1]
             new_resp = self.api_client.get(new_object_url, format='json',
-                    authentication=creds)
+                                           authentication=creds)
             self.assertValidJSONResponse(new_resp)
             new_obj_data = json.loads(new_resp.content)
             self.compare_data(post_data, new_obj_data)
 
     def authtest_update(self, user):
         creds = self.get_credentials(user)
-        resp, post_data = self.generic_create_auth(self.post_data(),
-                user, creds)
+        resp, post_data = self.generic_create_auth(
+            self.post_data(), user, creds)
         if self.has_perm(user, cyder.ACTION_UPDATE):
             new_object_url = resp.items()[2][1]
-            update_resp, patch_data = self.generic_update_auth(new_object_url,
-                    self.post_data(), user, creds)
-            patch_resp = self.api_client.get(new_object_url, format='json',
-                    authentication=creds)
+            update_resp, patch_data = self.generic_update_auth(
+                new_object_url, self.post_data(), user, creds)
+            patch_resp = self.api_client.get(
+                new_object_url, format='json', authentication=creds)
             self.assertValidJSONResponse(patch_resp)
             patch_obj_data = json.loads(patch_resp.content)
             self.compare_data(patch_data, patch_obj_data)
         else:
             #TODO: create an object and try to modify it as the user
             super_creds = self.get_credentials("test_superuser")
-            resp, post_data = self.generic_create_auth(self.post_data(),
-                    "test_superuser", super_creds)
+            resp, post_data = self.generic_create_auth(
+                self.post_data(), "test_superuser", super_creds)
             new_object_url = resp.items()[2][1]
             patch_data = self.post_data()
-            update_resp, patch_data = self.generic_update_auth(new_object_url,
-                    self.post_data(), user, creds)
+            update_resp, patch_data = self.generic_update_auth(
+                new_object_url, self.post_data(), user, creds)
 
     def authtest_changing_one_field(self, user):
         creds = self.get_credentials(user)
-        resp, post_data = self.generic_create_auth(self.post_data(),
-                user, creds)
+        resp, post_data = self.generic_create_auth(
+            self.post_data(), user, creds)
         if self.has_perm(user, cyder.ACTION_UPDATE):
             new_object_url = resp.items()[2][1]
             change_post_data = {}
             change_post_data['description'] = "==DIFFERENT=="
             post_data['description'] = "==DIFFERENT=="
-            resp, patch_data = self.generic_update_auth(new_object_url,
-                    change_post_data, user, creds)
-            new_resp = self.api_client.get(new_object_url, format='json',
-                    authentication=creds)
+            resp, patch_data = self.generic_update_auth(
+                new_object_url, change_post_data, user, creds)
+            new_resp = self.api_client.get(
+                new_object_url, format='json', authentication=creds)
             updated_obj_data = json.loads(new_resp.content)
             self.compare_data(post_data, updated_obj_data)
 
     def authtest_delete(self, user):
         creds = self.get_credentials(user)
         obj_count = self.test_type.objects.count()
-        resp, post_data = self.generic_create_auth(self.post_data(),
-                user, creds)
+        resp, post_data = self.generic_create_auth(
+            self.post_data(), user, creds)
         if self.has_perm(user, cyder.ACTION_DELETE):
             new_object_url = resp.items()[2][1]
             self.assertEqual(self.test_type.objects.count(), obj_count + 1)
-            resp = self.api_client.delete(new_object_url, format='json',
-                    authentication=creds)
+            resp = self.api_client.delete(
+                new_object_url, format='json', authentication=creds)
             self.assertHttpAccepted(resp)
             self.assertEqual(self.test_type.objects.count(), obj_count)
         else:
@@ -220,15 +220,15 @@ class CydnsAPIAuthTests(object):
         post_data['views'] = ['public']
         obj_count = self.test_type.objects.count()
         create_url = self.object_list_url.format(
-                API_VERSION, str(self.test_type.__name__).lower())
-        resp = self.api_client.post(create_url, format='json', data=post_data,
-                authentication=creds)
+            API_VERSION, str(self.test_type.__name__).lower())
+        resp = self.api_client.post(
+            create_url, format='json', data=post_data, authentication=creds)
         self.assertHttpCreated(resp)
         self.assertEqual(self.test_type.objects.count(), obj_count + 1)
 
         new_object_url = resp.items()[2][1]
-        new_resp = self.api_client.get(new_object_url, format='json',
-                authentication=creds)
+        new_resp = self.api_client.get(
+            new_object_url, format='json', authentication=creds)
         self.assertValidJSONResponse(new_resp)
         new_obj_data = json.loads(new_resp.content)
         self.assertTrue('views' in new_obj_data)
@@ -237,12 +237,12 @@ class CydnsAPIAuthTests(object):
         views = ['public', 'private']
         post_data = {'views': views}
         obj_count = self.test_type.objects.count()
-        resp, patch_data = self.generic_update_auth(new_object_url, post_data,
-                user, creds)
+        resp, patch_data = self.generic_update_auth(
+            new_object_url, post_data, user, creds)
         self.assertEqual(self.test_type.objects.count(), obj_count)
         self.assertTrue('views' in new_obj_data)
-        new_resp = self.api_client.get(new_object_url, format='json',
-                authentication=creds)
+        new_resp = self.api_client.get(
+            new_object_url, format='json', authentication=creds)
         updated_obj_data = json.loads(new_resp.content)
         for view_name in updated_obj_data['views']:
             self.assertTrue(view_name in views)
@@ -250,12 +250,12 @@ class CydnsAPIAuthTests(object):
         views = ['private']
         post_data = {'views': ['no-public']}
         obj_count = self.test_type.objects.count()
-        resp, patch_data = self.generic_update_auth(new_object_url, post_data,
-                user, creds)
+        resp, patch_data = self.generic_update_auth(
+            new_object_url, post_data, user, creds)
         self.assertEqual(self.test_type.objects.count(), obj_count)
         self.assertTrue('views' in new_obj_data)
-        new_resp = self.api_client.get(new_object_url, format='json',
-                authentication=creds)
+        new_resp = self.api_client.get(
+            new_object_url, format='json', authentication=creds)
         updated_obj_data = json.loads(new_resp.content)
         for view_name in updated_obj_data['views']:
             self.assertTrue(view_name in views)
@@ -266,10 +266,10 @@ class CNAMEAPITests(CydnsAPIAuthTests, ResourceTestCase):
 
     def post_data(self):
         test_domain = create_fake_zone(
-                random_label(), suffix='.oregonstate.edu')
+            random_label(), suffix='.oregonstate.edu')
         test_soa = test_domain.soa
         test_subdomain = Domain.objects.create(
-                name=random_label() + '.' + test_domain.name, soa=test_soa)
+            name=random_label() + '.' + test_domain.name, soa=test_soa)
         return {
             'fqdn': test_subdomain.name,
             'target': random_label(),
@@ -452,8 +452,8 @@ class StaticIntrV4APITests(CydnsAPIAuthTests, ResourceTestCase):
         resp, post_data = self.generic_create_auth(post_data, user, creds)
         if self.has_perm(user, cyder.ACTION_CREATE):
             new_object_url = resp.items()[2][1]
-            new_resp = self.api_client.get(new_object_url, format='json',
-                    authentication=creds)
+            new_resp = self.api_client.get(
+                new_object_url, format='json', authentication=creds)
             self.assertValidJSONResponse(new_resp)
             new_obj_data = json.loads(new_resp.content)
             self.compare_data(post_data, new_obj_data)

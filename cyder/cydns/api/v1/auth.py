@@ -50,7 +50,7 @@ class CyderAuthorization(Authorization):
         for ctnruser_obj in user_obj.ctnruser_set.all():
             ctnr = ctnruser_obj.ctnr
             obj_class = self.str_to_class(
-                    request.META['PATH_INFO'].split('/')[3])
+                request.META['PATH_INFO'].split('/')[3])
             if _has_perm(user_obj, ctnr, action, obj_class=obj_class):
                 return True
 

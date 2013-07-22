@@ -16,6 +16,7 @@ from cyder.cydns.tests.utils import create_fake_zone
 
 API_VERSION = 1
 
+
 class KVAPIAuthTests(object):
     fixtures = ['test_users/test_users.json']
     object_list_url = "/api/v{0}_dns/{1}/"
@@ -23,8 +24,8 @@ class KVAPIAuthTests(object):
 
     def setUp(self):
         super(KVAPIAuthTests, self).setUp()
-        self.domain = create_fake_zone(random_label(),
-                suffix='.oregonstate.edu')
+        self.domain = create_fake_zone(
+            random_label(), suffix='.oregonstate.edu')
 
     #Start helper functions.
     def get_credentials(self, user):
@@ -38,15 +39,15 @@ class KVAPIAuthTests(object):
 
     def has_perm(self, user, action):
         user_obj = User.objects.get(username=user)
-        return _has_perm(user_obj, Ctnr.objects.get(pk=9999),
-                action=action, obj_class=self.test_type)
+        return _has_perm(user_obj, Ctnr.objects.get(pk=9999), action=action,
+                         obj_class=self.test_type)
 
     def generic_create_auth(self, post_data, user, creds):
         obj_count = self.test_type.objects.count()
         create_url = self.object_list_url.format(
-                API_VERSION, str(self.test_type.__name__).lower())
-        resp = self.api_client.post(create_url, format='json', data=post_data,
-                authentication=creds)
+            API_VERSION, str(self.test_type.__name__).lower())
+        resp = self.api_client.post(
+            create_url, format='json', data=post_data, authentication=creds)
         if self.has_perm(user, cyder.ACTION_CREATE):
             self.assertHttpCreated(resp)
             self.assertEqual(self.test_type.objects.count(), obj_count + 1)
@@ -57,8 +58,8 @@ class KVAPIAuthTests(object):
 
     def generic_update_auth(self, patch_url, patch_data, user, creds):
         obj_count = self.test_type.objects.count()
-        resp = self.api_client.patch(patch_url, format='json', data=patch_data,
-                authentication=creds)
+        resp = self.api_client.patch(
+            patch_url, format='json', data=patch_data, authentication=creds)
         if self.has_perm(user, cyder.ACTION_UPDATE):
             self.assertHttpAccepted(resp)
             self.assertEqual(self.test_type.objects.count(), obj_count)
@@ -69,48 +70,48 @@ class KVAPIAuthTests(object):
 
     def authtest_create(self, user):
         creds = self.get_credentials(user)
-        resp, post_data = self.generic_create_auth(self.post_data(),
-                user, creds)
+        resp, post_data = self.generic_create_auth(
+            self.post_data(), user, creds)
         if self.has_perm(user, cyder.ACTION_CREATE):
             new_object_url = resp.items()[2][1]
-            new_resp = self.api_client.get(new_object_url, format='json',
-                    authentication=creds)
+            new_resp = self.api_client.get(
+                new_object_url, format='json', authentication=creds)
             self.assertValidJSONResponse(new_resp)
             new_obj_data = json.loads(new_resp.content)
             self.compare_data(post_data, new_obj_data)
 
     def authtest_update(self, user):
         creds = self.get_credentials(user)
-        resp, post_data = self.generic_create_auth(self.setup_data(),
-                user, creds)
+        resp, post_data = self.generic_create_auth(
+            self.setup_data(), user, creds)
         if self.has_perm(user, cyder.ACTION_UPDATE):
             new_object_url = resp.items()[2][1]
-            update_resp, patch_data = self.generic_update_auth(new_object_url,
-                    self.post_data(), user, creds)
-            patch_resp = self.api_client.get(new_object_url, format='json',
-                    authentication=creds)
+            update_resp, patch_data = self.generic_update_auth(
+                new_object_url, self.post_data(), user, creds)
+            patch_resp = self.api_client.get(
+                new_object_url, format='json', authentication=creds)
             self.assertValidJSONResponse(patch_resp)
             patch_obj_data = json.loads(patch_resp.content)
             self.compare_data(patch_data, patch_obj_data)
         else:
             super_creds = self.get_credentials("test_superuser")
-            resp, post_data = self.generic_create_auth(self.post_data(),
-                    "test_superuser", super_creds)
+            resp, post_data = self.generic_create_auth(
+                self.post_data(), "test_superuser", super_creds)
             new_object_url = resp.items()[2][1]
             patch_data = self.post_data()
-            update_resp, patch_data = self.generic_update_auth(new_object_url,
-                    self.post_data(), user, creds)
+            update_resp, patch_data = self.generic_update_auth(
+                new_object_url, self.post_data(), user, creds)
 
     def authtest_delete(self, user):
         creds = self.get_credentials(user)
         obj_count = self.test_type.objects.count()
-        resp, post_data = self.generic_create_auth(self.setup_data(),
-                user, creds)
+        resp, post_data = self.generic_create_auth(
+            self.setup_data(), user, creds)
         if self.has_perm(user, cyder.ACTION_DELETE):
             new_object_url = resp.items()[2][1]
             self.assertEqual(self.test_type.objects.count(), obj_count + 1)
-            resp = self.api_client.delete(new_object_url, format='json',
-                    authentication=creds)
+            resp = self.api_client.delete(
+                new_object_url, format='json', authentication=creds)
             self.assertHttpAccepted(resp)
             self.assertEqual(self.test_type.objects.count(), obj_count)
         else:
@@ -122,27 +123,29 @@ class KVAPIAuthTests(object):
         post_data = self.bad_post_data()
         obj_count = self.test_type.objects.count()
         create_url = self.object_list_url.format(
-                API_VERSION, str(self.test_type.__name__).lower())
-        resp = self.api_client.post(create_url, format='json', data=post_data,
-                authentication=creds)
+            API_VERSION, str(self.test_type.__name__).lower())
+        resp = self.api_client.post(
+            create_url, format='json', data=post_data, authentication=creds)
         self.assertHttpBadRequest(resp)
         self.assertEqual(self.test_type.objects.count(), obj_count)
 
     def test_bad_value_update(self):
         creds = self.get_credentials("test_superuser")
         good_post_data = self.setup_data()
-        resp, post_data = self.generic_create_auth(good_post_data,
-                "test_superuser", creds)
+        resp, post_data = self.generic_create_auth(
+            good_post_data, "test_superuser", creds)
         self.assertHttpCreated(resp)
         new_object_url = resp.items()[2][1]
         resp = self.api_client.patch(new_object_url, format='json',
-                data=self.bad_post_data(), authentication=creds)
+                                     data=self.bad_post_data(),
+                                     authentication=creds)
         self.assertHttpBadRequest(resp)
-        new_resp = self.api_client.get(new_object_url, format='json',
-                authentication=creds)
+        new_resp = self.api_client.get(
+            new_object_url, format='json', authentication=creds)
         self.assertValidJSONResponse(new_resp)
         new_obj_data = json.loads(new_resp.content)
         assert "interface_type" not in new_obj_data
+
 
 class StaticIntrKVAPITests(KVAPIAuthTests, ResourceTestCase):
     test_type = StaticInterface
