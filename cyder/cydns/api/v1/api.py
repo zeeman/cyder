@@ -5,6 +5,7 @@ import re
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 from tastypie import fields
+from tastypie.api import Api
 from tastypie.authentication import ApiKeyAuthentication
 from tastypie.resources import ModelResource
 
@@ -22,8 +23,6 @@ from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.utils import ensure_label_domain, prune_tree
 from cyder.cydns.view.models import View
-
-from tastypie.api import Api
 
 
 class CommonDNSResource(ModelResource):
