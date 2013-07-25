@@ -1,5 +1,4 @@
 from tastypie.authorization import Authorization
-from tastypie.exceptions import Unauthorized
 
 import cyder
 from cyder.core.cyuser.backends import _has_perm
@@ -36,63 +35,23 @@ class CyderAuthorization(Authorization):
             'staticinterface': StaticInterface,
         }[string.lower()]
 
-    def has_perm_list(self, object_list, bundle, action, error_msg):
-        user_obj = bundle.request.user
-        for obj in object_list:
-            obj_class = obj.__class__
-            for ctnruser_obj in user_obj.ctnruser_set.all():
-                ctnr_obj = ctnruser_obj.ctnr
-                if _has_perm(user_obj, ctnr_obj, action, obj_class=obj_class):
-                    return True
-            else:
-                raise Unauthorized(error_msg.format(repr(obj)))
+    def is_authorized(self, request, object=None):
+        if request.user.is_superuser:
+            return True
 
-    def has_perm_detail(self, object_list, bundle, action, error_msg):
-        user_obj = bundle.request.user
-        obj_class = bundle.obj.__class__
+        action = {
+            'POST': cyder.ACTION_CREATE,
+            'GET': cyder.ACTION_VIEW,
+            'PATCH': cyder.ACTION_UPDATE,
+            'DELETE': cyder.ACTION_DELETE,
+        }[request.META['REQUEST_METHOD']]
+
+        user_obj = request.user
         for ctnruser_obj in user_obj.ctnruser_set.all():
-            ctnr_obj = ctnruser_obj.ctnr
-            if _has_perm(user_obj, ctnr_obj, action, obj_class=obj_class):
+            ctnr = ctnruser_obj.ctnr
+            obj_class = self.str_to_class(
+                request.META['PATH_INFO'].split('/')[3])
+            if _has_perm(user_obj, ctnr, action, obj_class=obj_class):
                 return True
-        else:
-            raise Unauthorized(error_msg.format(repr(bundle.obj)))
 
-    def read_list(self, object_list, bundle):
-        return self.has_perm_list(
-            object_list, bundle, cyder.ACTION_VIEW,
-            "You may not view the record {0}.")
-
-    def read_detail(self, object_list, bundle):
-        return self.has_perm_detail(
-            object_list, bundle, cyder.ACTION_VIEW,
-            "You may not view the record {0}.")
-
-    def create_list(self, object_list, bundle):
-        return self.has_perm_list(
-            object_list, bundle, cyder.ACTION_CREATE,
-            "You may not create the record {0}.")
-
-    def create_detail(self, object_list, bundle):
-        return self.has_perm_detail(
-            object_list, bundle, cyder.ACTION_CREATE,
-            "You may not create the record {0}.")
-
-    def update_list(self, object_list, bundle):
-        return self.has_perm_list(
-            object_list, bundle, cyder.ACTION_UPDATE,
-            "You may not update the record {0}.")
-
-    def update_detail(self, object_list, bundle):
-        return self.has_perm_detail(
-            object_list, bundle, cyder.ACTION_UPDATE,
-            "You may not update the record {0}.")
-
-    def delete_list(self, object_list, bundle):
-        return self.has_perm_list(
-            object_list, bundle, cyder.ACTION_DELETE,
-            "You may not delete the record {0}")
-
-    def delete_detail(self, object_list, bundle):
-        return self.has_perm_detail(
-            object_list, bundle, cyder.ACTION_DELETE,
-            "You may not delete the record {0}.")
+        return False

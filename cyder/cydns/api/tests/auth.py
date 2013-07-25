@@ -173,7 +173,7 @@ class CydnsAPIAuthTests(object):
             patch_obj_data = json.loads(patch_resp.content)
             self.compare_data(patch_data, patch_obj_data)
         else:
-            #TODO: create an object and try to modify it as the user
+            #create an object and try to modify it as the user
             super_creds = self.get_credentials("test_superuser")
             resp, post_data = self.generic_create_auth(
                 self.post_data(), "test_superuser", super_creds)
