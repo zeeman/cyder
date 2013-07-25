@@ -193,6 +193,7 @@ class CommonDNSResource(ModelResource):
 
 allowed_methods = ['get', 'post', 'patch', 'delete']
 v1_dns_api = Api(api_name="v1_dns")
+custom_cache_throttle = CacheThrottle(throttle_at=10, timeframe=1)
 
 
 class ObjectListMixin(ModelResource):
@@ -214,7 +215,7 @@ class CNAMEResource(CommonDNSResource, ObjectListMixin, ModelResource):
         authentication = ApiKeyAuthentication()
         authorization = CyderAuthorization()
         allowed_methods = allowed_methods
-        throttle = CacheThrottle()
+        throttle = custom_cache_throttle
 
 
 v1_dns_api.register(CNAMEResource())
@@ -228,7 +229,7 @@ class TXTResource(CommonDNSResource, ObjectListMixin, ModelResource):
         authentication = ApiKeyAuthentication()
         authorization = CyderAuthorization()
         allowed_methods = allowed_methods
-        throttle = CacheThrottle()
+        throttle = custom_cache_throttle
 
 
 v1_dns_api.register(TXTResource())
@@ -242,7 +243,7 @@ class SRVResource(CommonDNSResource, ModelResource):
         authentication = ApiKeyAuthentication()
         authorization = CyderAuthorization()
         allowed_methods = allowed_methods
-        throttle = CacheThrottle()
+        throttle = custom_cache_throttle
 
 
 v1_dns_api.register(SRVResource())
@@ -256,7 +257,7 @@ class MXResource(CommonDNSResource, ModelResource):
         authentication = ApiKeyAuthentication()
         authorization = CyderAuthorization()
         allowed_methods = allowed_methods
-        throttle = CacheThrottle()
+        throttle = custom_cache_throttle
 
 
 v1_dns_api.register(MXResource())
@@ -270,7 +271,7 @@ class SSHFPResource(CommonDNSResource, ObjectListMixin, ModelResource):
         authentication = ApiKeyAuthentication()
         authorization = CyderAuthorization()
         allowed_methods = allowed_methods
-        throttle = CacheThrottle()
+        throttle = custom_cache_throttle
 
 
 v1_dns_api.register(SSHFPResource())
@@ -284,7 +285,7 @@ class AddressRecordResource(CommonDNSResource, ObjectListMixin, ModelResource):
         authentication = ApiKeyAuthentication()
         authorization = CyderAuthorization()
         allowed_methods = allowed_methods
-        throttle = CacheThrottle()
+        throttle = custom_cache_throttle
 
 
 v1_dns_api.register(AddressRecordResource())
@@ -314,7 +315,7 @@ class NameserverResource(CommonDNSResource, ObjectListMixin):
         authentication = ApiKeyAuthentication()
         authorization = CyderAuthorization()
         allowed_methods = allowed_methods
-        throttle = CacheThrottle()
+        throttle = custom_cache_throttle
 
 v1_dns_api.register(NameserverResource())
 
@@ -349,7 +350,7 @@ class PTRResource(CommonDNSResource, ObjectListMixin, ModelResource):
         authentication = ApiKeyAuthentication()
         authorization = CyderAuthorization()
         allowed_methods = allowed_methods
-        throttle = CacheThrottle()
+        throttle = custom_cache_throttle
 
 
 v1_dns_api.register(PTRResource())
@@ -362,7 +363,7 @@ class SystemResource(ModelResource):
         authentication = ApiKeyAuthentication()
         authorization = CyderAuthorization()
         allowed_methods = allowed_methods
-        throttle = CacheThrottle()
+        throttle = custom_cache_throttle
 
 
 v1_dns_api.register(SystemResource())
@@ -443,7 +444,7 @@ class StaticInterfaceResource(CommonDNSResource, ObjectListMixin,
         authorization = CyderAuthorization()
         allowed_methods = allowed_methods
         resource_name = 'staticinterface'
-        throttle = CacheThrottle()
+        throttle = custom_cache_throttle
 
 v1_dns_api.register(StaticInterfaceResource())
 
