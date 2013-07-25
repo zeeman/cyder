@@ -64,6 +64,8 @@ class CommonDNSResource(ModelResource):
                 bundle.errors['error_messages'] = json.dumps(errors)
                 # We should use an Error(Dict|List) to maintain consistency
                 # with the errors that are thrown by full_clean.
+        elif 'key' in bundle.data and 'value' in bundle.data:
+            pass #kv pairs are passed by themselves.
         else:
             errors = {}
             errors['fqdn'] = _("Couldn't determine a label and "

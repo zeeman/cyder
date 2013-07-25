@@ -27,6 +27,42 @@ class KVAPIAuthTests(object):
         self.domain = create_fake_zone(
             random_label(), suffix='.oregonstate.edu')
 
+    def test_create_guest(self):
+        self.authtest_create("test_guest")
+
+    def test_update_guest(self):
+        self.authtest_update("test_guest")
+
+    def test_delete_guest(self):
+        self.authtest_delete("test_guest")
+
+    def test_create_user(self):
+        self.authtest_create("test_user")
+
+    def test_update_user(self):
+        self.authtest_update("test_user")
+
+    def test_delete_user(self):
+        self.authtest_delete("test_user")
+
+    def test_create_admin(self):
+        self.authtest_create("test_admin")
+
+    def test_update_admin(self):
+        self.authtest_update("test_admin")
+
+    def test_delete_admin(self):
+        self.authtest_delete("test_admin")
+
+    def test_create_superuser(self):
+        self.authtest_create("test_superuser")
+
+    def test_update_superuser(self):
+        self.authtest_update("test_superuser")
+
+    def test_delete_superuser(self):
+        self.authtest_delete("test_superuser")
+
     #Start helper functions.
     def get_credentials(self, user):
         user_obj = User.objects.get(username=user)
@@ -69,6 +105,13 @@ class KVAPIAuthTests(object):
     #End helper functions.
 
     def authtest_create(self, user):
+        #create record with superuser
+        super_creds = self.get_credentials("test_superuser")
+        post_data = self.setup_data()
+        self.generic_create_auth(
+                self.setup_data(), "test_superuser", super_creds)
+
+        #create new kv pair using test user
         creds = self.get_credentials(user)
         resp, post_data = self.generic_create_auth(
             self.post_data(), user, creds)
