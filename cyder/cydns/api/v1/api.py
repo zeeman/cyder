@@ -11,6 +11,7 @@ from tastypie.resources import ModelResource
 
 from cyder.core.system.models import System
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.interface.static_intr.models import StaticIntrKeyValue
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.api.v1.auth import CyderAuthorization
 from cyder.cydns.cname.models import CNAME
@@ -64,8 +65,6 @@ class CommonDNSResource(ModelResource):
                 bundle.errors['error_messages'] = json.dumps(errors)
                 # We should use an Error(Dict|List) to maintain consistency
                 # with the errors that are thrown by full_clean.
-        elif 'key' in bundle.data and 'value' in bundle.data:
-            pass #kv pairs are passed by themselves.
         else:
             errors = {}
             errors['fqdn'] = _("Couldn't determine a label and "
@@ -84,7 +83,10 @@ class CommonDNSResource(ModelResource):
         'domain' will be removed from the bundle before hydrate is called.
         """
         obj = bundle.obj
-        kv = self.extract_kv(bundle)
+        if 'key' in bundle.data and 'value' in bundle.data:
+            kv = self.extract_kv(bundle)
+        else:
+            kv = []
         # KV pairs should be saved after the object has been created
         if bundle.errors:
             self.error_response(bundle.errors, request)
@@ -359,9 +361,21 @@ class SystemResource(ModelResource):
 v1_dns_api.register(SystemResource())
 
 
+class StaticIntrKVResource(CommonDNSResource, ObjectListMixin):
+    staticinterface = fields.ToOneField(
+        StaticInterfaceResource, 'staticinterface')
+
+    class Meta:
+        queryset = StaticIntrKeyValue.objects.all()
+        resource_name = 'staticinterfacekeyvalue'
+
+
 class StaticInterfaceResource(CommonDNSResource, ObjectListMixin,
                               ModelResource):
     system = fields.ToOneField(SystemResource, 'system', null=False, full=True)
+    keyvalues = fields.ToManyField(
+        StaticIntrKVResource, 'staticintrkeyvalue_set',
+        related_name='staticinterface', full=True)
 
     def hydrate(self, bundle):
         if 'system_hostname' in bundle.data and 'system' in bundle.data:
@@ -394,7 +408,7 @@ class StaticInterfaceResource(CommonDNSResource, ObjectListMixin,
             # It's key and value. Nothing else is allowed in the bundle.
             if set(('key', 'value')) != set(bundle.data):
                 error = _("key and value must be the only keys in your request"
-                          "when you are updating KV pairs.")
+                          " when you are updating KV pairs.")
                 bundle.errors['keyvalue'] = error
                 return []
             else:

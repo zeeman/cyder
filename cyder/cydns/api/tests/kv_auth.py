@@ -109,18 +109,20 @@ class KVAPIAuthTests(object):
         super_creds = self.get_credentials("test_superuser")
         post_data = self.setup_data()
         self.generic_create_auth(
-                self.setup_data(), "test_superuser", super_creds)
+                post_data, "test_superuser", super_creds)
 
         #create new kv pair using test user
         creds = self.get_credentials(user)
-        resp, post_data = self.generic_create_auth(
+        resp, new_post_data = self.generic_create_auth(
             self.post_data(), user, creds)
+
         if self.has_perm(user, cyder.ACTION_CREATE):
             new_object_url = resp.items()[2][1]
             new_resp = self.api_client.get(
                 new_object_url, format='json', authentication=creds)
             self.assertValidJSONResponse(new_resp)
             new_obj_data = json.loads(new_resp.content)
+            post_data[new_post_data['key']] = new_post_data['value']
             self.compare_data(post_data, new_obj_data)
 
     def authtest_update(self, user):
