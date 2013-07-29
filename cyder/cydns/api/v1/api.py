@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from tastypie import fields
 from tastypie.api import Api
 from tastypie.authentication import ApiKeyAuthentication
+from tastypie.authorization import ReadOnlyAuthorization
 from tastypie.resources import ModelResource
 
 from cyder.core.system.models import System
@@ -312,6 +313,7 @@ class NameserverResource(CommonDNSResource, ObjectListMixin):
         authorization = CyderAuthorization()
         allowed_methods = allowed_methods
 
+
 v1_dns_api.register(NameserverResource())
 
 
@@ -363,11 +365,17 @@ v1_dns_api.register(SystemResource())
 
 class StaticIntrKVResource(CommonDNSResource, ObjectListMixin):
     staticinterface = fields.ToOneField(
-        StaticInterfaceResource, 'staticinterface')
+        'cyder.cydns.api.v1.api.StaticInterfaceResource',
+        'staticinterface')
 
     class Meta:
         queryset = StaticIntrKeyValue.objects.all()
         resource_name = 'staticinterfacekeyvalue'
+        authentication = ApiKeyAuthentication()
+        authorization = ReadOnlyAuthorization()
+
+
+v1_dns_api.register(StaticIntrKVResource())
 
 
 class StaticInterfaceResource(CommonDNSResource, ObjectListMixin,
@@ -448,6 +456,7 @@ class StaticInterfaceResource(CommonDNSResource, ObjectListMixin,
         authorization = CyderAuthorization()
         allowed_methods = allowed_methods
         resource_name = 'staticinterface'
+
 
 v1_dns_api.register(StaticInterfaceResource())
 
