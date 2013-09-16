@@ -6,7 +6,7 @@ from cyder.core.cyuser.models import UserProfile
 
 class UserSerializer(serializers.ModelSerializer):
     ctnr_set = serializers.HyperlinkedRelatedField(
-        many=True, view_name='api-core-ctnr-detail')
+        many=True, view_name='api-core-ctnr-detail', read_only=True)
 
     class Meta:
         model = User
@@ -15,7 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer(many=False, read_only=True)
+    user = UserSerializer(many=False)
     default_ctnr = serializers.HyperlinkedRelatedField(
         view_name='api-core-ctnr-detail')
 
@@ -27,4 +27,3 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class UserProfileViewSet(viewsets.ModelViewSet):
     model = UserProfile
     serializer_class = UserProfileSerializer
-    queryset = UserProfile.objects.all()
