@@ -6,7 +6,7 @@ from cyder.cydns.ptr.models import PTR
 
 class PTRSerializer(api.CommonDNSSerializer):
     reverse_domain = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name="api-dns-domain-detail")
+        view_name="api-dns-domain-detail")
 
     class Meta(api.CommonDNSMeta):
         model = PTR

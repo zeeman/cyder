@@ -7,7 +7,7 @@ from cyder.cydns.soa.models import SOA, SOAKeyValue
 class SOAKeyValueSerializer(serializers.ModelSerializer):
     id = serializers.Field(source='id')
     soa = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-dns-soa-detail')
+        view_name='api-dns-soa-detail')
 
     class Meta:  # don't import from api.CommonDNSMeta so we get all fields
         model = SOAKeyValue

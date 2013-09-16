@@ -9,7 +9,7 @@ from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
 class StaticIntrKeyValueSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.Field(source='id')
     static_interface = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name="api-dhcp-staticinterface-detail")
+        view_name="api-dhcp-staticinterface-detail")
 
     class Meta:
         model = StaticIntrKeyValue
@@ -31,18 +31,18 @@ class StaticIntrNestedKeyValueSerializer(serializers.ModelSerializer):
 
 class StaticInterfaceSerializer(CommonDNSSerializer):
     system = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-core-system-detail')
+        view_name='api-core-system-detail')
     staticintrkeyvalue_set = StaticIntrNestedKeyValueSerializer(many=True)
     ctnr = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-core-ctnr-detail')
+        view_name='api-core-ctnr-detail')
     reverse_domain = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-dns-domain-detail')
+        view_name='api-dns-domain-detail')
     workgroup = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-dhcp-workgroup-detail')
+        view_name='api-dhcp-workgroup-detail')
     vrf = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-dhcp-vrf-detail')
+        view_name='api-dhcp-vrf-detail')
     domain = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-dns-domain-detail')
+        view_name='api-dns-domain-detail')
 
     class Meta(api.CommonDHCPMeta):
         model = StaticInterface

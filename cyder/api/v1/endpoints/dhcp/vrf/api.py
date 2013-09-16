@@ -7,7 +7,7 @@ from cyder.cydhcp.vrf.models import Vrf, VrfKeyValue
 class VrfKeyValueSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.Field(source='id')
     vrf = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-dhcp-vrf-detail')
+        view_name='api-dhcp-vrf-detail')
 
     class Meta:
         model = VrfKeyValue

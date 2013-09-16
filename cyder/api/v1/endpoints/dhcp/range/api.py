@@ -7,7 +7,7 @@ from cyder.cydhcp.range.models import Range, RangeKeyValue
 class RangeKeyValueSerializer(serializers.ModelSerializer):
     id = serializers.Field(source='id')
     range = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-dhcp-range-detail')
+        view_name='api-dhcp-range-detail')
 
     class Meta:
         model = RangeKeyValue

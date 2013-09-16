@@ -6,7 +6,7 @@ from cyder.cydns.nameserver.models import Nameserver
 
 class NameserverSerializer(api.CommonDNSSerializer):
     domain = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-dns-domain-detail')
+        view_name='api-dns-domain-detail')
 
     class Meta(api.CommonDNSMeta):
         model = Nameserver

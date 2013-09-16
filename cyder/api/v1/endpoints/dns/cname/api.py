@@ -7,7 +7,7 @@ from cyder.cydns.cname.models import CNAME
 class CNAMESerializer(api.CommonDNSSerializer, api.FQDNMixin):
     label = serializers.CharField()
     domain = serializers.HyperlinkedRelatedField(
-        many=False, read_only=True, view_name='api-dns-domain-detail')
+        many=False, view_name='api-dns-domain-detail')
 
     class Meta(api.CommonDNSMeta):
         model = CNAME

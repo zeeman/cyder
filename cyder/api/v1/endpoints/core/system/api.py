@@ -1,13 +1,12 @@
 from rest_framework import serializers, viewsets
 
-# from cyder.api.v1.endpoints.core import api
 from cyder.core.system.models import System, SystemKeyValue
 
 
 class SystemKeyValueSerializer(serializers.ModelSerializer):
     id = serializers.Field(source='id')
     system = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-core-system-detail')
+        view_name='api-core-system-detail')
 
     class Meta:
         model = SystemKeyValue

@@ -20,12 +20,12 @@ class FQDNMixin(object):
 class LabelDomainMixin(object):
     label = serializers.CharField()
     domain = serializers.HyperlinkedRelatedField(
-        many=False, read_only=True, view_name='api-dns-domain-detail')
+        many=False, view_name='api-dns-domain-detail')
 
 
 class CommonDNSSerializer(api.CommonAPISerializer):
     views = serializers.SlugRelatedField(
-        many=True, read_only=True, slug_field='name')
+        many=True, slug_field='name')
 
 
 class CommonDNSMeta(api.CommonAPIMeta):

@@ -7,7 +7,7 @@ from cyder.cydhcp.site.models import Site, SiteKeyValue
 class SiteKeyValueSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.Field(source='id')
     site = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-dhcp-site-detail')
+        view_name='api-dhcp-site-detail')
 
     class Meta:
         model = SiteKeyValue
@@ -29,7 +29,7 @@ class SiteNestedKeyValueSerializer(serializers.ModelSerializer):
 
 class SiteSerializer(api.CommonDHCPSerializer):
     parent = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-dhcp-site-detail')
+        view_name='api-dhcp-site-detail')
     sitekeyvalue_set = SiteNestedKeyValueSerializer(many=True)
 
     class Meta(api.CommonDHCPMeta):
