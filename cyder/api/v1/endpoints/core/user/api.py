@@ -15,7 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    user = UserSerializer(many=False, read_only=True)
     default_ctnr = serializers.HyperlinkedRelatedField(
         view_name='api-core-ctnr-detail')
 
