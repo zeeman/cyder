@@ -5,13 +5,13 @@ from cyder.core.cyuser.models import UserProfile
 
 
 class UserSerializer(serializers.ModelSerializer):
-    ctnr_set = serializers.HyperlinkedRelatedField(
+    ctnruser_set = serializers.HyperlinkedRelatedField(
         many=True, view_name='api-core-ctnr-detail', read_only=True)
 
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'email',
-                  'ctnr_set']
+                  'ctnruser_set', 'is_superuser']
 
 
 class UserProfileSerializer(serializers.ModelSerializer):

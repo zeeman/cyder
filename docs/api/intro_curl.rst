@@ -209,6 +209,8 @@ Let's say we want to query for every CNAME that aliases a non ``orst.edu`` domai
 
 Here's the first record we get back:
 
+.. code:: json
+
     {
         "created": "2013-08-16T18:55:39",
         "description": "",
