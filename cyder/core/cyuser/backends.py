@@ -109,6 +109,7 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         'Ctnr': has_administrative_perm,
         'User': has_administrative_perm,
         'UserProfile': has_administrative_perm,
+        'Token': has_administrative_perm,
         'CtnrUser': has_ctnr_user_perm,
         'CtnrObject': has_ctnr_object_perm,
 
