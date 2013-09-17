@@ -229,7 +229,7 @@ Most of the time, you will be using the API to find records matching different s
     
     def api_connect(url, token, params=None):
         if params:
-            url += urllib.urlencode(params)
+            url += '?' + urllib.urlencode(params)
         req = urllib2.Request(url)
         req.add_header('Authorization', 'Token ' + token)
         return urllib2.urlopen(req).read()
