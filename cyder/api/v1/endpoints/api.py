@@ -33,6 +33,8 @@ class NestedFieldSerializer(serializers.ModelSerializer):
                         for item in attrs.pop(nested_field):
                             getattr(self.instance, nested_field).add(item)
             for field in self.fields:
+                if field in self.Meta().nested_fields:
+                    continue
                 setattr(instance, field, attrs.get(
                     field, getattr(instance, field)))
             instance.save()
@@ -47,8 +49,8 @@ class NestedFieldSerializer(serializers.ModelSerializer):
         instance.save()
 
         for nested_field in nested_fields:
-            for item in nested_fields[nested_field]:
-                getattr(instance, nested_field).add(item)
+            getattr(instance, nested_field).add(*nested_fields[nested_field])
+
         return instance
 
     def save_object(self, *args, **kwargs):
