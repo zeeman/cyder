@@ -1,5 +1,6 @@
 from rest_framework import serializers, viewsets
 
+from cyder.api.v1.endpoints.api import NestedFieldSerializer
 from cyder.core.system.models import System, SystemKeyValue
 
 
@@ -27,12 +28,15 @@ class SystemNestedKeyValueSerializer(serializers.ModelSerializer):
         fields = ['id', 'key', 'value', 'is_quoted']
 
 
-class SystemSerializer(serializers.ModelSerializer):
+class SystemSerializer(NestedFieldSerializer):
+    id = serializers.HyperlinkedIdentityField(
+        view_name='api-core-system-detail')
     systemkeyvalue_set = SystemNestedKeyValueSerializer(many=True)
 
     class Meta:
         model = System
         fields = System.get_api_fields()
+        nested_fields = ['systemkeyvalue_set']
 
 
 class SystemViewSet(viewsets.ModelViewSet):
