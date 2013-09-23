@@ -9,7 +9,8 @@ NestedKeyValueFields = ['id', 'key', 'value', 'is_quoted']
 
 
 class FQDNMixin(object):
-    def restore_object(self, attrs):
+    def restore_object(self, attrs, *args, **kwargs):
+        super(FQDNMixin, self).restore_object(*args, **kwargs)
         if self.fqdn:
             try:
                 self.label, self.domain = ensure_label_domain(self.fqdn)

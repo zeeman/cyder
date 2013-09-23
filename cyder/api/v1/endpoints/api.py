@@ -22,6 +22,7 @@ class NestedFieldSerializer(serializers.ModelSerializer):
             instance - If the request is trying to update an object, this
                        contains the object to be modified.
         """
+        super(NestedFieldSerializer, self).restore_object(*args, **kwargs)
         if not self.is_valid():
             return self.errors
 

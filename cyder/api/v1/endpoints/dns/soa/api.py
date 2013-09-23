@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from cyder.api.v1.endpoints.api import NestedFieldSerializer
 from cyder.api.v1.endpoints.dns import api
 from cyder.cydns.soa.models import SOA, SOAKeyValue
 
@@ -27,11 +28,12 @@ class SOANestedKeyValueSerializer(serializers.ModelSerializer):
         fields = api.NestedKeyValueFields
 
 
-class SOASerializer(serializers.HyperlinkedModelSerializer):
+class SOASerializer(NestedFieldSerializer):
     keyvalue_set = SOANestedKeyValueSerializer(many=True)
 
     class Meta(api.CommonDNSMeta):
         model = SOA
+        nested_fields = ['keyvalue_set']
 
 
 class SOAViewSet(api.CommonDNSViewSet):
