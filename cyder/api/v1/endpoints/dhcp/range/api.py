@@ -36,7 +36,7 @@ class RangeSerializer(NestedFieldSerializer):
     class Meta(api.CommonDHCPMeta):
         model = Range
         depth = 1
-        nested_fields = ['ctnr_set']
+        nested_fields = ['rangekeyvalue_set', 'ctnr_set']
 
 
 class RangeViewSet(api.CommonDHCPViewSet):

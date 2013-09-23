@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from cyder.api.v1.endpoints.api import NestedFieldSerializer
 from cyder.api.v1.endpoints.dhcp import api
 from cyder.cydhcp.vlan.models import Vlan, VlanKeyValue
 
@@ -27,12 +28,13 @@ class VlanNestedKeyValueSerializer(serializers.ModelSerializer):
         fields = api.NestedKeyValueFields
 
 
-class VlanSerializer(serializers.HyperlinkedModelSerializer):
+class VlanSerializer(NestedFieldSerializer):
     vlankeyvalue_set = VlanNestedKeyValueSerializer(many=True)
 
     class Meta(api.CommonDHCPMeta):
         model = Vlan
         depth = 1
+        nested_fields = ['vlankeyvalue_set']
 
 
 class VlanViewSet(api.CommonDHCPViewSet):

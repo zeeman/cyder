@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from cyder.api.v1.endpoints.api import NestedFieldSerializer
 from cyder.api.v1.endpoints.dhcp import api
 from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
                                                         DynamicIntrKeyValue)
@@ -28,7 +29,9 @@ class DynamicIntrNestedKeyValueSerializer(serializers.ModelSerializer):
         fields = api.NestedKeyValueFields
 
 
-class DynamicInterfaceSerializer(serializers.ModelSerializer):
+class DynamicInterfaceSerializer(NestedFieldSerializer):
+    id = serializers.HyperlinkedIdentityField(
+        view_name='api-dhcp-dynamicinterface-detail')
     dynamicintrkeyvalue_set = DynamicIntrNestedKeyValueSerializer(many=True)
     system = serializers.HyperlinkedRelatedField(
         view_name='api-core-system-detail')
@@ -44,6 +47,7 @@ class DynamicInterfaceSerializer(serializers.ModelSerializer):
     class Meta(api.CommonDHCPMeta):
         model = DynamicInterface
         depth = 1
+        nested_fields = ['dynamicintrkeyvalue_set']
 
 
 class DynamicInterfaceViewSet(api.CommonDHCPViewSet):
