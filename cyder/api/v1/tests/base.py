@@ -39,7 +39,7 @@ class APIKVTestMixin(object):
         if not hasattr(self, "keyvalue_attr"):
             self.keyvalue_attr = self.model.__name__.lower() + "keyvalue_set"
 
-    def test_keyvalues(self):
+    def test_keyvalue_read(self):
         """Test key-value retrieval."""
         obj = self.create_data()
         getattr(obj, self.keyvalue_attr).get_or_create(
