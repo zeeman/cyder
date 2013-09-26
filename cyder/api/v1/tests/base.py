@@ -158,8 +158,7 @@ class APITests(object):
         obj = self.create_data()
         bad_id = obj.id
         self.model.objects.filter(id=bad_id).delete()
-        resp = self.client.get(
-            self.object_url(bad_id), **self.authheader)
+        resp = self.client.get(self.object_url(bad_id), **self.authheader)
         self.assertHttpNotFound(resp)
         assert json.loads(resp.content)['detail'] == "Not found"
 
