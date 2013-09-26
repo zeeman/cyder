@@ -1,19 +1,16 @@
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.http import HttpResponse
 
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
-from cyder.cydhcp.constants import (
-    ALLOW_OPTIONS, DENY_OPTIONS, RANGE_TYPE, STATIC
-)
 from cyder.cydns.validation import validate_ip_type
-from cyder.cydhcp.constants import (ALLOW_VRF, ALLOW_KNOWN,
-                                    ALLOW_LEGACY)
+from cyder.cydhcp.constants import (ALLOW_OPTIONS, ALLOW_VRF, ALLOW_KNOWN,
+                                    ALLOW_LEGACY, RANGE_TYPE, STATIC, DYNAMIC)
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.network.models import Network
-from cyder.cydhcp.utils import IPFilter, four_to_two, join_dhcp_args
+from cyder.cydhcp.utils import (IPFilter, four_to_two, join_dhcp_args,
+                                start_end_filter)
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydns.address_record.models import AddressRecord
@@ -52,31 +49,31 @@ class Range(models.Model, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     network = models.ForeignKey(Network, null=True, blank=True)
 
+    range_type = models.CharField(max_length=2, choices=RANGE_TYPE,
+                                  default=STATIC)
+
     ip_type = models.CharField(
         verbose_name='IP address type', max_length=1,
         choices=IP_TYPES.items(), default=IP_TYPE_4,
         validators=[validate_ip_type]
     )
-    start_upper = models.BigIntegerField(null=True)
-    start_lower = models.BigIntegerField(null=True)
-    start_str = models.CharField(max_length=39, editable=True)
 
-    end_lower = models.BigIntegerField(null=True)
-    end_upper = models.BigIntegerField(null=True)
-    end_str = models.CharField(max_length=39, editable=True)
+    start_upper = models.BigIntegerField(null=True, editable=False)
+    start_lower = models.BigIntegerField(null=True, editable=False)
+    start_str = models.CharField(max_length=39)
+
+    end_lower = models.BigIntegerField(null=True, editable=False)
+    end_upper = models.BigIntegerField(null=True, editable=False)
+    end_str = models.CharField(max_length=39)
 
     is_reserved = models.BooleanField(default=False, blank=False)
 
     allow = models.CharField(max_length=1, choices=ALLOW_OPTIONS,
                              default=ALLOW_LEGACY)
-    deny = models.CharField(max_length=20, choices=DENY_OPTIONS.items(),
-                            blank=True)
 
     attrs = None
     dhcpd_raw_include = models.TextField(blank=True)
     dhcp_enabled = models.BooleanField(default=True)
-    range_type = models.CharField(max_length=2, choices=RANGE_TYPE.items(),
-                                  default=STATIC, editable=False)
 
     search_fields = ('start_str', 'end_str')
     display_fields = ('start_str', 'end_str')
@@ -187,6 +184,16 @@ class Range(models.Model, ObjectUrlMixin):
         if start > end:
             raise ValidationError("The start of a range cannot be greater than"
                                   " or equal to the end of the range.")
+
+        if self.range_type == STATIC and self.dynamicinterface_set.exists():
+            raise ValidationError('A static range cannot contain dynamic '
+                                  'interfaces')
+
+        if self.range_type == DYNAMIC and StaticInterface.objects.filter(
+                start_end_filter(start, end, self.ip_type)[2]).exists():
+            raise ValidationError('A dynamic range cannot contain static '
+                                  'interfaces')
+
         if not self.is_reserved:
             self.network.update_network()
             if self.network.ip_type == IP_TYPE_4:
@@ -301,13 +308,12 @@ class Range(models.Model, ObjectUrlMixin):
 
             :returns: ipaddr.IPv4Address
         """
-        if self.network.ip_type is not '4':
+        if self.network and self.network.ip_type != '4':
             return None
-        start = self.start_lower
-        end = self.end_lower
-        if start >= end - 1:
-            return HttpResponse("Too small of a range.")
-        ip = find_free_ip(start, end, ip_type='4')
+        elif self.ip_type != '4':
+            return None
+
+        ip = find_free_ip(self.start_lower, self.end_lower, ip_type='4')
         if ip:
             return ip
         else:

@@ -45,6 +45,11 @@ table.table {
         tr {
             td {
                 text-align: center;
+                word-wrap: break-word;
+                a.btn {
+                    white-space:nowrap;
+                }
+                max-width: 125px;
             }
             &:hover {
                 background: darken($white, 10%);
@@ -148,6 +153,16 @@ table {
             right: 300px;
             transform: scale(3,3);
             -webkit-transform: scale(3,3);
+        }
+        tbody {
+            tr {
+                td {
+                    a.btn {
+                        padding-right: 0 !important;
+                        padding-left: 0 !important;
+                    }
+                }
+            }
         }
     }
 }
