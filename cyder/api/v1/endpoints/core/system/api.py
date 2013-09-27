@@ -35,7 +35,6 @@ class SystemSerializer(NestedFieldSerializer):
 
     class Meta:
         model = System
-        fields = System.get_api_fields()
         nested_fields = ['systemkeyvalue_set']
 
 
