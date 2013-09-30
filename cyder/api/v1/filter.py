@@ -3,6 +3,13 @@ from rest_framework import exceptions, filters
 from cyder.core.ctnr.models import Ctnr
 
 
+ALLOWED_ENDINGS = (
+    '__exact', '__iexact', '__contains', '__icontains', '__gt',
+    '__gte', '__lt', '__lte', '__startswith', '__istartswith',
+    '__endswith', '__iendswith', '__isnull', '__search',
+)
+
+
 class InvalidQuery(exceptions.APIException):
     status_code = 400
 
@@ -15,12 +22,6 @@ class SearchFieldFilter(filters.BaseFilterBackend):
     """Filter based on record attributes."""
 
     def filter_queryset(self, request, queryset, view):
-        ALLOWED_ENDINGS = (
-            '__exact', '__iexact', '__contains', '__icontains', '__gt',
-            '__gte', '__lt', '__lte', '__startswith', '__istartswith',
-            '__endswith', '__iendswith', '__isnull', '__search',
-        )
-
         q_include = {}
         q_exclude = {}
         q_keyvalues = {}
