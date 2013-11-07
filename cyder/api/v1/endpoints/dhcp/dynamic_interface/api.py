@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from cyder.api.v1.endpoints.api import CommonAPINestedAVSerializer
+from cyder.api.v1.endpoints.api import (CommonAPINestedAVSerializer,
+                                        NestedFieldSerializer)
 from cyder.api.v1.endpoints.dhcp import api
 from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
                                                         DynamicInterfaceAV)
@@ -30,7 +31,7 @@ class DynamicInterfaceNestedAVSerializer(CommonAPINestedAVSerializer):
         fields = api.NestedAVFields
 
 
-class DynamicInterfaceSerializer(serializers.ModelSerializer):
+class DynamicInterfaceSerializer(NestedFieldSerializer):
     dynamicinterfaceav_set = DynamicInterfaceNestedAVSerializer(many=True)
     system = serializers.HyperlinkedRelatedField(
         read_only=True, view_name='api-core-system-detail')
@@ -46,6 +47,7 @@ class DynamicInterfaceSerializer(serializers.ModelSerializer):
     class Meta(api.CommonDHCPMeta):
         model = DynamicInterface
         depth = 1
+        nested_fields = ['dynamicinterfaceav_set']
 
 
 class DynamicInterfaceViewSet(api.CommonDHCPViewSet):

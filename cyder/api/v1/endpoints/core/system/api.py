@@ -1,6 +1,7 @@
 from rest_framework import serializers, viewsets
 
-from cyder.api.v1.endpoints.api import CommonAPINestedAVSerializer
+from cyder.api.v1.endpoints.api import (CommonAPINestedAVSerializer,
+                                        NestedFieldSerializer)
 from cyder.core.system.models import System, SystemAV
 
 
@@ -30,11 +31,12 @@ class SystemNestedAVSerializer(CommonAPINestedAVSerializer):
         fields = ['id', 'attribute', 'value']
 
 
-class SystemSerializer(serializers.ModelSerializer):
+class SystemSerializer(NestedFieldSerializer):
     systemav_set = SystemNestedAVSerializer(many=True)
 
     class Meta:
         model = System
+        nested_fields = ['systemav_set']
 
 
 class SystemViewSet(viewsets.ModelViewSet):

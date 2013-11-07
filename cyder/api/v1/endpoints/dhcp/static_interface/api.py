@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from cyder.api.v1.endpoints.api import CommonAPINestedAVSerializer
+from cyder.api.v1.endpoints.api import (CommonAPINestedAVSerializer,
+                                        NestedFieldSerializer)
 from cyder.api.v1.endpoints.dhcp import api
 from cyder.api.v1.endpoints.dns.api import CommonDNSSerializer
 from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
@@ -31,7 +32,7 @@ class StaticIntrNestedKeyValueSerializer(CommonAPINestedAVSerializer):
         fields = api.NestedAVFields
 
 
-class StaticInterfaceSerializer(CommonDNSSerializer):
+class StaticInterfaceSerializer(NestedFieldSerializer, CommonDNSSerializer):
     system = serializers.HyperlinkedRelatedField(
         read_only=True, view_name='api-core-system-detail')
     staticinterfaceav_set = StaticIntrNestedKeyValueSerializer(many=True)
@@ -47,6 +48,7 @@ class StaticInterfaceSerializer(CommonDNSSerializer):
     class Meta(api.CommonDHCPMeta):
         model = StaticInterface
         depth = 1
+        nested_fields = ['staticinterfaceav_set']
 
 
 class StaticInterfaceViewSet(api.CommonDHCPViewSet):

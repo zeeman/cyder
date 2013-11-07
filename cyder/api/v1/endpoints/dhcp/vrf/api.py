@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from cyder.api.v1.endpoints.api import CommonAPINestedAVSerializer
+from cyder.api.v1.endpoints.api import (CommonAPINestedAVSerializer,
+                                        NestedFieldSerializer)
 from cyder.api.v1.endpoints.dhcp import api
 from cyder.cydhcp.vrf.models import Vrf, VrfAV
 
@@ -29,12 +30,13 @@ class VrfNestedKeyValueSerializer(CommonAPINestedAVSerializer):
         fields = api.NestedAVFields
 
 
-class VrfSerializer(serializers.HyperlinkedModelSerializer):
+class VrfSerializer(NestedFieldSerializer):
     vrfav_set = VrfNestedKeyValueSerializer(many=True)
 
     class Meta(api.CommonDHCPMeta):
         model = Vrf
         depth = 1
+        nested_fields = ['vrfav_set']
 
 
 class VrfViewSet(api.CommonDHCPViewSet):

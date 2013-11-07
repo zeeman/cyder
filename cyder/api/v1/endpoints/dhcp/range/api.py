@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from cyder.api.v1.endpoints.api import CommonAPINestedAVSerializer
+from cyder.api.v1.endpoints.api import (CommonAPINestedAVSerializer,
+                                        NestedFieldSerializer)
 from cyder.api.v1.endpoints.dhcp import api
 from cyder.cydhcp.range.models import Range, RangeAV
 
@@ -29,12 +30,13 @@ class RangeNestedKeyValueSerializer(CommonAPINestedAVSerializer):
         fields = api.NestedAVFields
 
 
-class RangeSerializer(api.CommonDHCPSerializer):
+class RangeSerializer(NestedFieldSerializer):
     rangeav_set = RangeNestedKeyValueSerializer(many=True)
 
     class Meta(api.CommonDHCPMeta):
         model = Range
         depth = 1
+        nested_fields = ['rangeav_set']
 
 
 class RangeViewSet(api.CommonDHCPViewSet):

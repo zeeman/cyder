@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from cyder.api.v1.endpoints.api import CommonAPINestedAVSerializer
+from cyder.api.v1.endpoints.api import (CommonAPINestedAVSerializer,
+                                        NestedFieldSerializer)
 from cyder.api.v1.endpoints.dhcp import api
 from cyder.cydhcp.site.models import Site, SiteAV
 
@@ -29,13 +30,14 @@ class SiteNestedKeyValueSerializer(CommonAPINestedAVSerializer):
         fields = api.NestedAVFields
 
 
-class SiteSerializer(api.CommonDHCPSerializer):
+class SiteSerializer(NestedFieldSerializer):
     parent = serializers.HyperlinkedRelatedField(
         read_only=True, view_name='api-dhcp-site-detail')
     siteav_set = SiteNestedKeyValueSerializer(many=True)
 
     class Meta(api.CommonDHCPMeta):
         model = Site
+        nested_fields = ['siteav_set']
 
 
 class SiteViewSet(api.CommonDHCPViewSet):

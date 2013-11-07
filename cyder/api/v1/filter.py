@@ -48,8 +48,8 @@ class SearchFieldFilter(filters.BaseFilterBackend):
                 queryset = queryset.order_by(*sort)
 
             elif q == "ctnr_id":
-                queryset &= parent_model.filter_by_ctnr(
-                    Ctnr.objects.get(id=int(p)))
+                queryset = queryset & parent_model.filter_by_ctnr(
+                    Ctnr.objects.get(id=int(p))).all()
 
             elif q == "ctnr":
                 queryset = queryset & parent_model.filter_by_ctnr(

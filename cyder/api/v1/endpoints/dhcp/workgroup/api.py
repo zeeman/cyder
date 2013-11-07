@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from cyder.api.v1.endpoints.api import CommonAPINestedAVSerializer
+from cyder.api.v1.endpoints.api import (CommonAPINestedAVSerializer,
+                                        NestedFieldSerializer)
 from cyder.api.v1.endpoints.dhcp import api
 from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupAV
 
@@ -29,12 +30,13 @@ class WorkgroupNestedKeyValueSerializer(CommonAPINestedAVSerializer):
         fields = api.NestedAVFields
 
 
-class WorkgroupSerializer(serializers.HyperlinkedModelSerializer):
+class WorkgroupSerializer(NestedFieldSerializer):
     workgroupav_set = WorkgroupNestedKeyValueSerializer(many=True)
 
     class Meta(api.CommonDHCPMeta):
         model = Workgroup
         depth = 1
+        nested_field = ['workgroupav_set']
 
 
 class WorkgroupViewSet(api.CommonDHCPViewSet):
