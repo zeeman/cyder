@@ -32,7 +32,7 @@ class SystemNestedAVSerializer(CommonAPINestedAVSerializer):
 
 
 class SystemSerializer(NestedFieldSerializer):
-    systemav_set = SystemNestedAVSerializer(many=True)
+    systemav_set = SystemNestedAVSerializer(many=True, required=False)
 
     class Meta:
         model = System

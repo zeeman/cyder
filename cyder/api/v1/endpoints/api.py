@@ -22,10 +22,12 @@ class NestedFieldSerializer(serializers.ModelSerializer):
             instance - If the request is trying to update an object, this
                        contains the object to be modified.
         """
-        super(NestedFieldSerializer, self).restore_object(*args, **kwargs)
+        super(NestedFieldSerializer, self).restore_object(
+            attrs, instance=instance, *args, **kwargs)
         if not self.is_valid():
             return self.errors
 
+        # handle updating an object
         if instance is not None:
             # add nested values from to-many fields as appropriate
             if getattr(self.Meta(), 'nested_fields', None):
@@ -41,11 +43,13 @@ class NestedFieldSerializer(serializers.ModelSerializer):
             instance.save()
             return instance
 
+        # handle creating a new object
         if getattr(self.Meta(), 'nested_fields', None):
             nested_fields = {}
             for nested_field in self.Meta().nested_fields:
                 if nested_field in attrs:
                     nested_fields[nested_field] = attrs.pop(nested_field)
+
         instance = self.Meta().model(**attrs)
         instance.save()
 
