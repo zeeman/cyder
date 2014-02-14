@@ -1,6 +1,7 @@
 from rest_framework import routers
 
 from cyder.api.v1.endpoints.core.ctnr.api import CtnrViewSet
+from cyder.api.v1.endpoints.core.interface.api import InterfaceViewSet
 from cyder.api.v1.endpoints.core.system.api import SystemAVViewSet
 from cyder.api.v1.endpoints.core.system.api import SystemViewSet
 from cyder.api.v1.endpoints.core.user.api import UserProfileViewSet
@@ -41,6 +42,8 @@ router = routers.DefaultRouter()
 
 
 router.register(r'core/ctnr', CtnrViewSet, base_name='api-core-ctnr')
+router.register(r'core/interface', InterfaceViewSet,
+                base_name='api-core-interface')
 router.register(r'core/system/attributes', SystemAVViewSet,
                 base_name='api-core-system_attributes')
 router.register(r'core/system', SystemViewSet, base_name='api-core-system')
