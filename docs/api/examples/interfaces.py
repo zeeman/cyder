@@ -52,9 +52,11 @@ def filter_dict(dict, keys):
 
 
 def process_interfaces(systems,
-                      system_fields=('name',),
-                      staticinterface_fields=('ip_str', 'mac'),
-                      dynamicinterface_fields=('range', 'mac')):
+                      system_fields=(),
+                      staticinterface_fields=('fqdn', 'ip_str', 'mac',
+                                              'last_seen'),
+                      dynamicinterface_fields=('domain', 'range', 'mac',
+                                               'last_seen')):
     """
     Take the nested dict containing an interface and convert it to a 2D list for
     CSV conversion.
