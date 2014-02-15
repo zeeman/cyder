@@ -1,3 +1,6 @@
+# TODO: Let user filter by ctnr and attributes. Auto-resolve hyperlinked fields.
+# TODO: Make columns fqdn, type, mac, ip, last seen.
+
 from conrad import Conrad
 
 API_TOKEN = "4df242bda29ab46e9343ed1042a557fa9540935c"
