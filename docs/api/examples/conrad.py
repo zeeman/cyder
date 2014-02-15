@@ -35,7 +35,7 @@ class Conrad(object):
         self.prev_url = None
         self.next_url = None
 
-    def get(self, path, query=None, verbatim=False):
+    def get(self, path="", query=None, verbatim=False):
         """
         Params:
         path    The specific path to access under self.base_url. May or
