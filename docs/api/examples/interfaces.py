@@ -62,21 +62,6 @@ def process_interfaces(systems,
     CSV conversion.
     """
 
-    # extract
-    # processed = {}
-    # processed.update(filter_dict(interface, system_fields))
-    # processed.update(filter_dict(interface['staticinterface_set'],
-    #                              staticinterface_fields))
-    # processed.update(filter_dict(interface['dynamicinterface_set'],
-    #                              dynamicinterface_fields))
-
-    # processed = []
-    # processed.append([interface[field] for field in system_fields])
-    # processed.append([interface['staticinterface_set'][field]
-    #                   for field in staticinterface_fields])
-    # processed.append([interface['dynamicinterface_set'][field]
-    #                   for field in dynamicinterface_fields])
-
     headers = list(
         set(system_fields)
         | set(staticinterface_fields)
