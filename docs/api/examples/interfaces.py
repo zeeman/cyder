@@ -93,5 +93,11 @@ def main():
     render_csv(headers, rows, separator='~')
 
 
+def cli_main():
+    import getopt
+    import sys
+
+
+
 if __name__ == "__main__":
     main()
