@@ -10,7 +10,8 @@ INTERFACE_ENDPOINT_URL = "http://127.0.0.1:8000/api/v1/core/interface/"
 def render_csv(cols, data, separator=',', newline='\n'):
     print separator.join(cols)
     print newline.join(
-        [separator.join([(row[col] if col in row else "") for col in cols]) for row in data])
+        [separator.join([(row[col] if col in row else "") for col in cols])
+         for row in data])
 
 
 def list_to_csv(list, separator=',', newline='\n'):
@@ -94,8 +95,24 @@ def main():
 
 
 def cli_main():
-    import getopt
+    import argparse
     import sys
+
+    parser = argparse.ArgumentParser(description="Export systems from Cyder")
+    parser.add_argument('--limit', type=int, help="The maximum number of "
+                                                  "records to export")
+    parser.add_argument('--ctnr', type=str, help="Limit results to this "
+                                                 "container")
+    parser.add_argument('--dynamic_fields', help="Fields to return for dynamic "
+                                                 "interfaces")
+    parser.add_argument('--static_fields', help="Fields to return for static "
+                                                "interfaces")
+    parser.add_argument('--dynamic_attrs', help="Attributes to return for "
+                                                "dynamic interfaces")
+    parser.add_argument('--static_attrs', help="Attributes to return for "
+                                               "static interfaces")
+    parser.add_argument('--query', help="Arbitrary string to append to query "
+                                        "string.")
 
 
 
