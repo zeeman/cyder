@@ -4,6 +4,7 @@ from cyder.base.eav.constants import (ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT,
                                       ATTRIBUTE_INVENTORY)
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
+from cyder.base.utils import mixedmethod
 from cyder.cydhcp.interface.dynamic_intr.validation import is_dynamic_range
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.utils import format_mac, join_dhcp_args
@@ -141,6 +142,20 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
             self.range.save()
             if old_range:
                 old_range.save()
+
+    @mixedmethod
+    def has_perm(self, cls, user, ctnr, action):
+        """
+        self - class instance
+        cls - class
+        user - User instance
+        ctnr - Ctnr instance
+        action - Cyder action constant.
+        """
+        if self is None:  # class reference - handle
+            # deliberately broken in case I forget
+        raise Exception()
+
 
 
 class DynamicInterfaceAV(EAVBase):

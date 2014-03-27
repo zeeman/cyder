@@ -1,4 +1,5 @@
 import distutils.dir_util
+from functools import partial
 import operator
 import os
 import shlex
@@ -186,3 +187,32 @@ def django_pretty_type(obj_type):
         return 'user'
     else:
         return None
+
+
+class mixedmethod(object):
+    """This decorator mutates a function defined in a class into a 'mixed' class
+       and instance method.
+
+    Author: Gribouillis
+    Created: 2012-01-13 12:10:17.722112 (isoformat date)
+    License: Public Domain
+    Use this code freely.
+
+     Usage:
+        class Spam:
+            @mixedmethod
+                def egg(self, cls, *args, **kwargs):
+                    if self is None:
+                        pass # executed if egg was called as a class method
+                    else:
+                        pass # executed if egg was called as an instance method
+
+    The decorated methods need 2 implicit arguments: self and cls, the former
+    being None when there is no instance in the call. This follows the same rule
+    as __get__ methods in python's descriptor protocol.
+    """
+    def __init__(self, func):
+        self.func = func
+
+    def __get__(self, instance, cls):
+        return partial(self.func, instance, cls)
