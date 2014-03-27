@@ -4,11 +4,11 @@ from cyder.base.eav.constants import (ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT,
                                       ATTRIBUTE_INVENTORY)
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
-from cyder.base.utils import mixedmethod
 from cyder.cydhcp.interface.dynamic_intr.validation import is_dynamic_range
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.utils import format_mac, join_dhcp_args
 from cyder.cydhcp.workgroup.models import Workgroup
+from cyder.core.cyuser.backends import custom_has_perm, allow_all, read_only
 from cyder.core.fields import MacAddrField
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
@@ -33,6 +33,11 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
                                        verbose_name='Enable DHCP?')
     last_seen = models.DateTimeField(null=True, blank=True)
     search_fields = ('mac',)
+
+    has_perm = custom_has_perm(cyder_admin_perms=allow_all,
+                               ctnr_admin_perms=allow_all,
+                               user_perms=allow_all,
+                               guest_perms=read_only)
 
     class Meta:
         app_label = 'cyder'
@@ -142,19 +147,6 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
             self.range.save()
             if old_range:
                 old_range.save()
-
-    @mixedmethod
-    def has_perm(self, cls, user, ctnr, action):
-        """
-        self - class instance
-        cls - class
-        user - User instance
-        ctnr - Ctnr instance
-        action - Cyder action constant.
-        """
-        if self is None:  # class reference - handle
-            # deliberately broken in case I forget
-        raise Exception()
 
 
 

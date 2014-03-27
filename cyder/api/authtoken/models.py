@@ -6,6 +6,7 @@ from django.db import models
 from rest_framework.authtoken.models import AUTH_USER_MODEL
 
 from cyder.base.mixins import ObjectUrlMixin
+from cyder.base.utils import mixedmethod
 
 
 class Token(models.Model, ObjectUrlMixin):
@@ -43,3 +44,12 @@ class Token(models.Model, ObjectUrlMixin):
             ('Created', 'token__created', self.created),
         ]
         return data
+
+    @mixedmethod
+    def has_perm(self, cls, user, ctnr, action):
+        """Custom has_perm handler.
+
+        Falling back on the view-level checks for now. This is painful, but
+        I need some time to consider how to handle object-level checks.
+        """
+        return True
