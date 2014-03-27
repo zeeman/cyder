@@ -47,34 +47,6 @@ def get_user_level(user, ctnr):
     return user_level
 
 
-class PermsMixin(object):
-    """
-    This mixin provides an easy way to
-
-    For the class that inherits this mixin, define an attribute .perms which
-    contains a Perms instance with each
-    """
-    @mixedmethod
-    def has_perm(self, cls, user, ctnr, action):
-        if user.is_superuser:
-            return True
-        getattr(self.perms, get_user_level(user, ctnr))(action)
-
-
-class Perms(object):
-    """
-    Each attribute must be a function which accepts an action level constant
-    and returns whether or not that action is allowed for the user.
-    """
-    def __init__(self, cyder_admin, ctnr_admin, user=read_only, guest=read_only,
-                 pleb=deny):
-        self.cyder_admin = cyder_admin
-        self.ctnr_admin = ctnr_admin
-        self.user = user
-        self.guest = guest
-        self.pleb = pleb
-
-
 # Special permissions functions to be passed to the perms factory.
 def allow_all(action, *args, **kwargs):
     return True
