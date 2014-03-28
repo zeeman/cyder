@@ -145,5 +145,11 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
     interface, it will be maintained indefinitely. However, it should be treated
     as deprecated, and code that currently relies on it should be refactored.
     """
+    from cyder.base.constants import get_klasses
+
+    # ugly hack because of where obj_class comes from.
+    if obj_class and isinstance(obj_class, basestring):
+        obj_class, _ = get_klasses(obj_class)
+
     return (obj.has_perm(user, ctnr, action) if obj else
             obj_class.has_perm(user, ctnr, action))
