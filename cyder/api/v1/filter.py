@@ -60,8 +60,9 @@ class SearchFieldFilter(filters.BaseFilterBackend):
                 queryset = queryset.order_by(*sort)
 
             elif q == "ctnr_id":
+                ctnr = p.split(',')
                 queryset &= parent_model.filter_by_ctnr(
-                    Ctnr.objects.get(id=int(p)))
+                    Ctnr.objects.get(id__in=int(p)))
 
             elif q == "ctnr":
                 queryset = queryset & parent_model.filter_by_ctnr(
