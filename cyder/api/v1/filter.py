@@ -60,13 +60,14 @@ class SearchFieldFilter(filters.BaseFilterBackend):
                 queryset = queryset.order_by(*sort)
 
             elif q == "ctnr_id":
-                ctnr = p.split(',')
-                queryset &= parent_model.filter_by_ctnr(
-                    Ctnr.objects.get(id__in=int(p)))
+                for ctnr_id in map(int, p.split(',')):
+                    queryset |= parent_model.filter_by_ctnr(
+                        Ctnr.objects.get(id=ctnr_id))
 
             elif q == "ctnr":
-                queryset = queryset & parent_model.filter_by_ctnr(
-                    Ctnr.objects.get(name=p)).all()
+                for ctnr in p.split(','):
+                    queryset |= parent_model.filter_by_ctnr(
+                        Ctnr.objects.get(name=ctnr))
 
             elif q not in UNHANDLED_PARAMS:
                 raise InvalidQuery(
