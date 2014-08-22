@@ -21,6 +21,7 @@ from cyder.base.helpers import do_sort
 from cyder.base.utils import (_filter, make_megafilter,
                               make_paginator, tablefy)
 from cyder.base.mixins import UsabilityFormMixin
+from cyder.base.models import LoggedModel
 from cyder.base.utils import django_pretty_type
 from cyder.core.cyuser.utils import perm, perm_soft
 from cyder.core.cyuser.models import User
@@ -153,7 +154,12 @@ def cy_view(request, template, pk=None, obj_type=None):
         if form.is_valid():
             try:
                 if perm(request, ACTION_CREATE, obj=obj, obj_class=Klass):
-                    obj = form.save()
+                    if isinstance(obj, LoggedModel):
+                        obj = form.save(commit=False)
+                        obj.last_save_user = request.user
+                        obj.save()
+                    else:
+                        obj = form.save()
 
                     if Klass.__name__ == 'Ctnr':
                         request = ctnr_update_session(request, obj)

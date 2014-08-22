@@ -1,8 +1,64 @@
+from django.contrib.auth.models import User
+from django.core import serializers
 from django.db import models
 from django.utils.safestring import mark_safe
 
 from cyder.base.utils import classproperty
+from cyder.settings.local import MAX_LOG_ENTRIES
 
+
+class DeleteLog(models.Model):
+    obj_type = models.CharField(max_length=30)
+    deleted = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User)
+    log = models.TextField()
+
+
+class LoggedModel(models.Model):
+    """Allows changes to objects to be logged for auditing purposes.
+
+    Objects inheriting from this class must specify an attribute audit_fields
+    listing the names of fields to be logged as strings.
+
+    On deletion, a LoggedModel object will cause the creation of a DeleteLog
+    entry, which will record the deleted object's class name, date of deletion,
+    and the data contained in the deleted object's log.
+    """
+    log = models.TextField(blank=True)
+    last_save_user = models.ForeignKey(User, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+
+    def serialized(self):
+        return serializers.serialize(
+            "json", self.__class__.objects.filter(pk=self.pk),
+            ensure_ascii=False,
+            fields=self.audit_fields + ('last_save_user',))
+
+    def save(self, *args, **kwargs):
+        # only update the log if the record has already been saved
+        if self.pk:
+            log_lines = self.log.split('\n')
+
+            # get the serialized representation, append it to the log
+            log_lines.append(self.serialized())
+
+            # remove log entries if we're over the limit
+            if len(log_lines) > MAX_LOG_ENTRIES:
+                log_lines = log_lines[-MAX_LOG_ENTRIES:]
+
+            self.log = '\n'.join(log_lines)
+
+        return super(LoggedModel, self).save(*args, **kwargs)
+
+    def delete(self, user=None, *args, **kwargs):
+        # before deleting, save the data to the DeleteLog
+        dl = DeleteLog(obj_type=self.__class__.__name__,
+                       log=self.log + "\n" + self.serialized(),
+                       user=user)
+        dl.save()
+        return super(LoggedModel, self).delete(*args, **kwargs)
 
 class BaseModel(models.Model):
     """

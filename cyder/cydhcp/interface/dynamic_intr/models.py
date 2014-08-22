@@ -13,13 +13,13 @@ from cyder.core.fields import MacAddrField
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 from cyder.base.mixins import ObjectUrlMixin
-from cyder.base.models import BaseModel, ExpirableMixin
+from cyder.base.models import BaseModel, ExpirableMixin, LoggedModel
 
 import datetime
 import re
 
 
-class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
+class DynamicInterface(LoggedModel, BaseModel, ObjectUrlMixin, ExpirableMixin):
     pretty_type = 'dynamic interface'
 
     ctnr = models.ForeignKey(Ctnr, null=False, verbose_name="Container")
@@ -32,7 +32,9 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
     dhcp_enabled = models.BooleanField(default=True,
                                        verbose_name='Enable DHCP?')
     last_seen = models.DateTimeField(null=True, blank=True)
-    search_fields = ('mac',)
+    search_fields = 'mac',
+    audit_fields = ('ctnr', 'workgroup', 'system', 'mac', 'range',
+                    'dhcp_enabled', 'last_seen', 'modified', 'expire')
 
     class Meta:
         app_label = 'cyder'
