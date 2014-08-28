@@ -156,7 +156,11 @@ def cy_view(request, template, pk=None, obj_type=None):
                 if perm(request, ACTION_CREATE, obj=obj, obj_class=Klass):
                     if isinstance(obj, LoggedModel):
                         obj = form.save(commit=False)
-                        obj.last_save_user = request.user
+                        if 'become_user_stack' in request.session:
+                            obj.last_save_user = \
+                                request.session.become_user_stack[0]
+                        else:
+                            obj.last_save_user = request.user
                         obj.save()
                     else:
                         obj = form.save()
