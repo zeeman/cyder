@@ -9,3 +9,8 @@
                      button_name="Dynamic Interface Attribute") }}
   {% endif %}
 {% endblock %}
+
+{% block extra_content %}
+  Log: <textarea rows="10" cols="50">{{ obj.log }}</textarea>
+  Last modified: {{ obj.last_save_user }}
+{% endblock %}
