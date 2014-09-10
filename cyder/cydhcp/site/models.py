@@ -6,11 +6,11 @@ from cyder.base.eav.constants import ATTRIBUTE_INVENTORY
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
-from cyder.base.models import BaseModel
+from cyder.base.models import BaseModel, LoggedModel
 from cyder.cydhcp.utils import networks_to_Q
 
 
-class Site(BaseModel, ObjectUrlMixin):
+class Site(LoggedModel, BaseModel, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255,
                             validators=[RegexValidator('^[^/]+$')])
@@ -19,6 +19,7 @@ class Site(BaseModel, ObjectUrlMixin):
 
     search_fields = ('name', 'parent__name')
     display_fields = ('name',)
+    audit_fields = 'name', 'parent'
 
     class Meta:
         app_label = 'cyder'

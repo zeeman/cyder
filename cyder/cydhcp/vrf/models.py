@@ -7,10 +7,10 @@ from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
-from cyder.base.models import BaseModel
+from cyder.base.models import BaseModel, LoggedModel
 
 
-class Vrf(BaseModel, ObjectUrlMixin):
+class Vrf(LoggedModel, BaseModel, ObjectUrlMixin):
     pretty_type = 'VRF'
 
     id = models.AutoField(primary_key=True)

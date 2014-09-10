@@ -9,7 +9,7 @@ from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
-from cyder.base.models import BaseModel
+from cyder.base.models import BaseModel, LoggedModel
 from cyder.cydhcp.constants import DYNAMIC
 from cyder.cydhcp.utils import IPFilter, join_dhcp_args
 from cyder.cydhcp.vlan.models import Vlan
@@ -21,14 +21,14 @@ from cyder.cydns.ip.models import ipv6_to_longs
 # import reversion
 
 
-class Network(BaseModel, ObjectUrlMixin):
+class Network(LoggedModel, BaseModel, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     vlan = models.ForeignKey(Vlan, null=True,
                              blank=True, on_delete=models.SET_NULL)
     site = models.ForeignKey(Site, null=True,
                              blank=True, on_delete=models.SET_NULL)
     vrf = models.ForeignKey('cyder.Vrf',
-                            default=lambda: Vrf.objects.get(name='Legacy'))
+                            default=1)
 
     # NETWORK/NETMASK FIELDS
     ip_type = models.CharField(
@@ -54,6 +54,9 @@ class Network(BaseModel, ObjectUrlMixin):
 
     search_fields = ('vlan__name', 'site__name', 'network_str')
     display_fields = ('network_str',)
+    audit_fields = ('id', 'vlan', 'site', 'vrf', 'ip_type', 'ip_upper',
+                    'ip_lower', 'network_str', 'prefixlen', 'enabled',
+                    'dhcpd_raw_include')
 
     class Meta:
         app_label = 'cyder'

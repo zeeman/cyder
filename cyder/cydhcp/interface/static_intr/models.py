@@ -15,7 +15,7 @@ from cyder.base.eav.constants import (ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT,
                                       ATTRIBUTE_INVENTORY)
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
-from cyder.base.models import ExpirableMixin
+from cyder.base.models import ExpirableMixin, LoggedModel
 
 from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.range.utils import find_range
@@ -28,7 +28,7 @@ from cyder.cydns.ip.utils import ip_to_dns_form, check_for_reverse_domain
 from cyder.cydns.domain.models import Domain
 
 
-class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
+class StaticInterface(LoggedModel, BaseAddressRecord, BasePTR, ExpirableMixin):
     # Keep in mind that BaseAddressRecord will have it's methods called before
     # BasePTR
     """The StaticInterface Class.
@@ -77,6 +77,8 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
     last_seen = models.DateTimeField(null=True, blank=True)
 
     search_fields = ('mac', 'ip_str', 'fqdn')
+    audit_fields = ('ctnr', 'mac', 'reverse_domain', 'system', 'workgroup',
+                    'dhcp_enabled', 'dns_enabled', 'last_seen')
 
     class Meta:
         app_label = 'cyder'

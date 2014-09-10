@@ -7,11 +7,11 @@ from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
-from cyder.base.models import BaseModel
+from cyder.base.models import BaseModel, LoggedModel
 from cyder.cydhcp.utils import join_dhcp_args
 
 
-class Workgroup(BaseModel, ObjectUrlMixin):
+class Workgroup(LoggedModel, BaseModel, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True)
 

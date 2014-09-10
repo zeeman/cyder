@@ -8,7 +8,7 @@ from cyder.base.eav.constants import ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
-from cyder.base.models import BaseModel
+from cyder.base.models import BaseModel, LoggedModel
 from cyder.base.utils import simple_descriptor
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydhcp.constants import (ALLOW_OPTIONS, ALLOW_ANY, ALLOW_KNOWN,
@@ -27,7 +27,7 @@ from cyder.cydns.ptr.models import PTR
 import ipaddr
 
 
-class Range(BaseModel, ViewMixin, ObjectUrlMixin):
+class Range(LoggedModel, BaseModel, ViewMixin, ObjectUrlMixin):
     """The Range class.
 
         >>> Range(start=start_ip, end=end_ip,
@@ -105,7 +105,10 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
 
     search_fields = ('start_str', 'end_str', 'name')
     display_fields = ('start_str', 'end_str')
-
+    audit_fields = ('network', 'range_type', 'ip_type', 'start_str', 'end_str',
+                    'domain', 'is_reserved', 'allow', 'dhcpd_raw_include',
+                    'dhcp_enabled', 'name', 'description', 'allow_voip_phones',
+                    'range_usage')
     class Meta:
         app_label = 'cyder'
         db_table = 'range'

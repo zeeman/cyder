@@ -7,12 +7,12 @@ from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
-from cyder.base.models import BaseModel
+from cyder.base.models import BaseModel, LoggedModel
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.utils import networks_to_Q
 
 
-class Vlan(BaseModel, ObjectUrlMixin):
+class Vlan(LoggedModel, BaseModel, ObjectUrlMixin):
     @property
     def pretty_name(self):
         return self.name
@@ -25,6 +25,7 @@ class Vlan(BaseModel, ObjectUrlMixin):
 
     search_fields = ('name', 'number',)
     display_fields = ('name',)
+    audit_fields = 'name', 'number'
 
     class Meta:
         app_label = 'cyder'

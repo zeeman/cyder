@@ -15,3 +15,18 @@
         data-csrfToken="{{ csrf_token }}">
   </span>
 {% endblock %}
+
+{% block extra_content %}
+<div class="form">
+    <p>
+        <label for="log">Log (oldest first):</label>
+        <textarea rows="10" cols="50" id="log" readonly>{% if obj.log %}{{ obj.log }}{% else %}no log data{% endif %}</textarea>
+    </p>
+    <p>
+        <label for="last_save_user">Last modified by:</label>
+        <p id="last_save_user">
+            {% if obj.last_save_user %}{{ obj.last_save_user }}{% else %}unlogged user{% endif %}
+        </p>
+    </p>
+</div>
+{% endblock %}
