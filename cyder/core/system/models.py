@@ -21,6 +21,9 @@ class System(BaseModel, ObjectUrlMixin):
     def __str__(self):
         return get_display(self)
 
+    def audit_repr(self):
+        return "{} ({})".format(self.name, self.pk)
+
     class Meta:
         app_label = 'cyder'
         db_table = 'system'
