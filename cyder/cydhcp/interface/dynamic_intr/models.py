@@ -15,6 +15,8 @@ from cyder.core.system.models import System
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel, ExpirableMixin, LoggedModel
 
+
+
 import datetime
 import re
 
@@ -35,6 +37,12 @@ class DynamicInterface(LoggedModel, BaseModel, ObjectUrlMixin, ExpirableMixin):
     search_fields = 'mac',
     audit_fields = ('ctnr', 'workgroup', 'system', 'mac', 'range',
                     'dhcp_enabled', 'last_seen', 'modified', 'expire')
+
+    def serializer(self):
+        from cyder.cydhcp.interface.dynamic_intr.log_serializer import \
+            DynamicInterfaceLogSerializer
+
+        return DynamicInterfaceLogSerializer
 
     class Meta:
         app_label = 'cyder'

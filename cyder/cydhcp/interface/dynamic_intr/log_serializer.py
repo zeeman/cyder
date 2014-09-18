@@ -28,6 +28,3 @@ class DynamicInterfaceLogSerializer(serializers.ModelSerializer):
     
     def get_range_representation(self, obj):
         return obj.range.audit_repr()
-
-    def get_audit_representation(self, obj):
-        return obj.audit_repr()

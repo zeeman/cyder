@@ -3,9 +3,10 @@ from django.core import serializers
 from django.db import models
 from django.utils.safestring import mark_safe
 
+from rest_framework.renderers import JSONRenderer
+
 from cyder.base.utils import classproperty
 from cyder.settings.local import MAX_LOG_ENTRIES
-
 
 class DeleteLog(models.Model):
     obj_type = models.CharField(max_length=30)
@@ -31,17 +32,11 @@ class LoggedModel(models.Model):
         abstract = True
 
     def serialized(self):
-        # ensure_ascii is used to prevent unicode characters from screwing up
-        # the serialization. the resulting string is indexed so that the first
-        # and last characters are removed because the result is returned as a
-        # list, even though only one object is being serialized
-        return serializers.serialize(
-            "json", self.__class__.objects.filter(pk=self.pk),
-            ensure_ascii=False,
-            fields=self.audit_fields + ('last_save_user',))[1:-1]
+        return JSONRenderer().render(self.serializer()(self).data)
 
     def save(self, *args, **kwargs):
         # only update the log if the record has already been saved
+        import pudb; pudb.set_trace()
         if self.pk:
             log_lines = self.log.split('\n')
 
