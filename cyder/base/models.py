@@ -36,7 +36,6 @@ class LoggedModel(models.Model):
 
     def save(self, *args, **kwargs):
         # only update the log if the record has already been saved
-        import pudb; pudb.set_trace()
         if self.pk:
             log_lines = self.log.split('\n')
 
