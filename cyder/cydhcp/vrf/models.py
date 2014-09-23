@@ -10,7 +10,7 @@ from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel, LoggedModel
 
 
-class Vrf(LoggedModel, BaseModel, ObjectUrlMixin):
+class Vrf(BaseModel, ObjectUrlMixin):
     pretty_type = 'VRF'
 
     id = models.AutoField(primary_key=True)
