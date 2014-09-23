@@ -1,3 +1,4 @@
+import simplejson as json
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.forms.util import ErrorList
 from django.shortcuts import render, get_object_or_404
@@ -6,6 +7,7 @@ from cyder.base.constants import get_klasses
 from cyder.base.views import (BaseCreateView, BaseDeleteView,
                               BaseDetailView, BaseListView, BaseUpdateView,
                               cy_view, cy_delete, search_obj, table_update)
+from cyder.base.models import LoggedModel
 from cyder.cydhcp.forms import IpSearchForm
 from cyder.cydhcp.network.utils import calc_networks, calc_parent
 from cyder.cydns.address_record.models import AddressRecord
@@ -37,5 +39,5 @@ def cydhcp_detail(request, pk):
     attr_getter = getattr(obj, "{0}av_set".format(obj_type))
     return render(request, "{0}/{0}_detail.html".format(obj_type), {
         obj_type: obj,
-        'attrs': attr_getter.all()
+        'attrs': attr_getter.all(),
     })

@@ -17,10 +17,20 @@
 {% endblock %}
 
 {% block extra_content %}
+<!--
 <div class="form">
     <p>
         <label for="log">Log (oldest first):</label>
         <textarea rows="10" cols="50" id="log" readonly>{% if obj.log %}{{ obj.log }}{% else %}no log data{% endif %}</textarea>
+        {% if log_entries %}
+        {% for entry in log_entries %}
+            <table>
+            {% for key in entry %}
+                <tr><td>{{ key }}</td><td>{{ entry[key] }}</td></tr>
+            {% endfor %}
+            </table>
+        {% endfor %}
+        {% endif %}
     </p>
     <p>
         <label for="last_save_user">Last modified by:</label>
@@ -29,4 +39,26 @@
         </p>
     </p>
 </div>
+-->
+{% if log_entries %}
+<h2>Recent changes</h2>
+<table class="table">
+    <thead>
+    <tr>
+    {% for col in log_entries['cols'] %}
+        <th>{{ col }}</th>
+    {% endfor %}
+    </tr>
+    </thead>
+    <tbody>
+    {% for entry in log_entries['entries'] %}
+    <tr>
+    {% for col in log_entries['cols'] %}
+    <td>{{ entry[col] }}</td>
+    {% endfor %}
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %}
 {% endblock %}

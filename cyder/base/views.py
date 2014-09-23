@@ -207,6 +207,8 @@ def cy_view(request, template, pk=None, obj_type=None):
         'obj_type': obj_type,
         'pretty_obj_type': Klass.pretty_type,
         'pk': pk,
+        'log_entries': ([json.loads(e) for e in obj.log.split('\n')]
+                        if hasattr(obj, 'log') else None)
     })
 
 
@@ -289,6 +291,18 @@ def cy_delete(request):
     return redirect(referer)
 
 
+def generate_log(obj):
+    if not obj.log:
+        return None
+
+    entries = [json.loads(e) for e in obj.log.split('\n') if e]
+    if entries:
+        cols = set.union(*[set(e.keys()) for e in entries if e])
+        return {'cols': cols, 'entries': entries}
+    else:
+        return None
+
+
 def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None, **kwargs):
     """Show bunches of related tables.
 
@@ -332,7 +346,9 @@ def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None, **kwargs):
         'obj_type': obj_type,
         'pretty_obj_type': (django_pretty_type(obj_type) or
                             get_klasses(obj_type)[0].pretty_type),
-        'tables': tables
+        'tables': tables,
+        'log_entries': (generate_log(obj) if isinstance(obj, LoggedModel)
+                        else None)
     }.items() + kwargs.items()))
 
 

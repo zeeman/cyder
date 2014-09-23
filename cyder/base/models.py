@@ -31,6 +31,10 @@ class LoggedModel(models.Model):
     class Meta:
         abstract = True
 
+    def serializer(self):
+        raise NotImplementedError("This model inherits from LoggedModel, but "
+                                  "it doesn't specify a serializer to use")
+
     def serialized(self):
         return JSONRenderer().render(self.serializer().data)
 
