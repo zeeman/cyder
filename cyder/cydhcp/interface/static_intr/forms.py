@@ -48,7 +48,7 @@ class StaticInterfaceForm(RangeWizard, ViewChoiceForm,
     class Meta:
         model = StaticInterface
         exclude = ('ip_upper', 'ip_lower', 'reverse_domain', 'fqdn',
-                   'last_seen')
+                   'last_seen', 'last_save_user', 'log')
         widgets = {'ip_type': forms.RadioSelect,
                    'views': forms.CheckboxSelectMultiple}
         always_validate = ('mac',)

@@ -32,6 +32,10 @@ class Vlan(LoggedModel, BaseModel, ObjectUrlMixin):
         db_table = "vlan"
         unique_together = ("name", "number")
 
+    def serializer(self):
+        from cyder.cydhcp.vlan.log_serializer import VlanLogSerializer
+        return VlanLogSerializer(self)
+
     def __str__(self):
         return '{0} ({1})'.format(get_display(self), self.number)
 

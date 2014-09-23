@@ -10,7 +10,7 @@ from cyder.base.eav.constants import ATTRIBUTE_INVENTORY
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
-from cyder.base.models import BaseModel
+from cyder.base.models import BaseModel, LoggedModel
 from cyder.cydns.validation import (validate_fqdn, validate_ttl,
                                     validate_minimum)
 from cyder.core.task.models import Task
@@ -27,7 +27,7 @@ DEFAULT_REFRESH = 180  # 3 min
 DEFAULT_MINIMUM = 180  # 3 min
 
 
-class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
+class SOA(LoggedModel, BaseModel, ObjectUrlMixin, DisplayMixin):
     """
     SOA stands for Start of Authority
 
@@ -93,6 +93,10 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
         # We are using the description field here to stop the same SOA from
         # being assigned to multiple zones. See the documentation in the
         # Domain models.py file for more info.
+
+    def serializer(self):
+        from cyder.cydns.soa.log_serializer import SOALogSerializer
+        return SOALogSerializer(self)
 
     def bind_render_record(self):
         template = Template(self.template).substitute(**self.justs)

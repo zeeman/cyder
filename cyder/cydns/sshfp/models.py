@@ -4,6 +4,7 @@ from gettext import gettext as _
 from django.db import models
 from django.core.exceptions import ValidationError
 
+from cyder.base.models import LoggedModel
 from cyder.cydns.models import CydnsRecord, LabelDomainMixin
 
 
@@ -26,7 +27,7 @@ def validate_sha1(sha1):
         raise ValidationError("Invalid key.")
 
 
-class SSHFP(LabelDomainMixin, CydnsRecord):
+class SSHFP(LoggedModel, LabelDomainMixin, CydnsRecord):
     """
     >>> SSHFP(label=label, domain=domain, key=key_data,
     ... algorithm_number=algo_num, fingerprint_type=fing_type)
@@ -58,6 +59,10 @@ class SSHFP(LabelDomainMixin, CydnsRecord):
         # _mysql_exceptions.OperationalError: (1170, "BLOB/TEXT column
         # 'txt_data' used in key specification without a key length")
         # Fix that ^
+
+    def serializer(self):
+        from cyder.cydns.sshfp.log_serializer import SSHFPLogSerializer
+        return SSHFPLogSerializer(self)
 
     def details(self):
         """For tables."""

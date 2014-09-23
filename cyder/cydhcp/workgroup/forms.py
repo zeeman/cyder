@@ -8,6 +8,7 @@ class WorkgroupForm(forms.ModelForm):
 
     class Meta:
         model = Workgroup
+        exclude = 'last_save_user', 'log'
 
 
 WorkgroupAVForm = get_eav_form(WorkgroupAV, Workgroup)

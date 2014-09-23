@@ -9,6 +9,7 @@ class VlanForm(forms.ModelForm):
 
     class Meta:
         model = Vlan
+        exclude = 'last_save_user', 'log'
 
 
 VlanAVForm = get_eav_form(VlanAV, Vlan)

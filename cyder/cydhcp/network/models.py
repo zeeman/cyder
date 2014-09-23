@@ -63,6 +63,10 @@ class Network(LoggedModel, BaseModel, ObjectUrlMixin):
         db_table = 'network'
         unique_together = ('ip_upper', 'ip_lower', 'prefixlen')
 
+    def serializer(self):
+        from cyder.cydhcp.network.log_serializer import NetworkLogSerializer
+        return NetworkLogSerializer(self)
+
     def __str__(self):
         return get_display(self)
 

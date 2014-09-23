@@ -10,12 +10,13 @@ class SSHFPForm(DNSForm, UsabilityFormMixin):
         model = SSHFP
         exclude = ('fqdn',)
         fields = ('label', 'domain', 'key', 'algorithm_number',
-                  'fingerprint_type', 'views', 'ttl', 'description')
+                  'fingerprint_type', 'views', 'ttl', 'description',
+                  'last_save_user', 'log')
         widgets = {'views': forms.CheckboxSelectMultiple}
 
 
 class FQDNSSHFPForm(DNSForm):
     class Meta:
         model = SSHFP
-        exclude = ('label', 'domain')
+        exclude = ('label', 'domain', 'last_save_user', 'log')
         widgets = {'views': forms.CheckboxSelectMultiple}

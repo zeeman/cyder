@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 
+from cyder.base.models import LoggedModel
 from cyder.cydns.models import CydnsRecord
 from cyder.cydns.cname.models import CNAME
 
@@ -13,7 +14,7 @@ from cyder.cydns.models import LabelDomainMixin
 from gettext import gettext as _
 
 
-class MX(LabelDomainMixin, CydnsRecord):
+class MX(LoggedModel, LabelDomainMixin, CydnsRecord):
     """
     >>> MX(label=label, domain=domain, server=server, priority=prio,
     ...     ttl=tll)
@@ -38,6 +39,10 @@ class MX(LabelDomainMixin, CydnsRecord):
         db_table = 'mx'
         # label and domain in CydnsRecord
         unique_together = ('domain', 'label', 'server', 'priority')
+
+    def serializer(self):
+        from cyder.cydns.mx.log_serializer import MXLogSerializer
+        return MXLogSerializer(self)
 
     def __str__(self):
         return "{0} {1} {3} {4} {5}".format(self.fqdn, self.ttl, 'IN', 'MX',

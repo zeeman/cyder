@@ -3,11 +3,12 @@ from string import Template
 
 from django.db import models
 
+from cyder.base.models import LoggedModel
 from cyder.cydns.models import CydnsRecord, LabelDomainMixin
 from cyder.cydns.validation import validate_txt_data
 
 
-class TXT(LabelDomainMixin, CydnsRecord):
+class TXT(LoggedModel, LabelDomainMixin, CydnsRecord):
     """
     >>> TXT(label=label, domain=domain, txt_data=txt_data)
     """
@@ -29,6 +30,10 @@ class TXT(LabelDomainMixin, CydnsRecord):
         # _mysql_exceptions.OperationalError: (1170, "BLOB/TEXT column
         # "txt_data" used in key specification without a key length")
         # Fix that ^
+
+    def serializer(self):
+        from cyder.cydns.txt.log_serializer import TXTLogSerializer
+        return TXTLogSerializer(self)
 
     def details(self):
         """For tables."""

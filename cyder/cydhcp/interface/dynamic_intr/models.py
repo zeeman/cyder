@@ -42,7 +42,7 @@ class DynamicInterface(LoggedModel, BaseModel, ObjectUrlMixin, ExpirableMixin):
         from cyder.cydhcp.interface.dynamic_intr.log_serializer import \
             DynamicInterfaceLogSerializer
 
-        return DynamicInterfaceLogSerializer
+        return DynamicInterfaceLogSerializer(self)
 
     class Meta:
         app_label = 'cyder'

@@ -32,7 +32,7 @@ class LoggedModel(models.Model):
         abstract = True
 
     def serialized(self):
-        return JSONRenderer().render(self.serializer()(self).data)
+        return JSONRenderer().render(self.serializer().data)
 
     def save(self, *args, **kwargs):
         # only update the log if the record has already been saved

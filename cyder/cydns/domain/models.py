@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
-from cyder.base.models import BaseModel
+from cyder.base.models import BaseModel, LoggedModel
 from cyder.cydns.validation import validate_domain_name
 from cyder.cydns.validation import do_zone_validation
 from cyder.cydns.search_utils import smart_fqdn_exists
@@ -12,7 +12,7 @@ from cyder.cydns.validation import validate_reverse_name
 from cyder.cydns.domain.utils import name_to_domain
 
 
-class Domain(BaseModel, ObjectUrlMixin):
+class Domain(LoggedModel, BaseModel, ObjectUrlMixin):
     """A Domain is used as a foreign key for most DNS records.
 
     A domain's SOA should be shared by only domains within its zone.
@@ -95,6 +95,10 @@ class Domain(BaseModel, ObjectUrlMixin):
 
     display_fields = ('name',)
     search_fields = ('name',)
+
+    def serializer(self):
+        from cyder.cydns.domain.log_serializer import DomainLogSerializer
+        return DomainLogSerializer(self)
 
     class Meta:
         app_label = 'cyder'

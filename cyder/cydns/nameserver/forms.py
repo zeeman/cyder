@@ -11,7 +11,7 @@ class NameserverForm(DNSForm, UsabilityFormMixin):
     class Meta:
         model = Nameserver
         fields = ('domain', 'server', 'views', 'ttl', 'description')
-        exclude = ('addr_glue', 'intr_glue')
+        exclude = ('addr_glue', 'intr_glue', 'last_save_user', 'log')
         widgets = {'views': forms.CheckboxSelectMultiple}
 
     def __init__(self, *args, **kwargs):

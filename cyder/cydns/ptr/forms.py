@@ -19,7 +19,7 @@ class PTRForm(DNSForm, RangeWizard, UsabilityFormMixin):
 
     class Meta:
         model = PTR
-        exclude = ('ip', 'reverse_domain', 'ip_upper',
-                   'ip_lower')
+        exclude = ('ip', 'reverse_domain', 'ip_upper', 'ip_lower',
+                   'last_save_user', 'log')
         widgets = {'views': forms.CheckboxSelectMultiple,
                    'ip_type': forms.RadioSelect}

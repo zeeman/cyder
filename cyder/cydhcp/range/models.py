@@ -114,7 +114,11 @@ class Range(LoggedModel, BaseModel, ViewMixin, ObjectUrlMixin):
         db_table = 'range'
         unique_together = ('start_upper', 'start_lower', 'end_upper',
                            'end_lower')
-    
+
+    def serializer(self):
+        from cyder.cydhcp.range.log_serializer import RangeLogSerializer
+        return RangeLogSerializer(self)
+
     def audit_repr(self):
         return "{name} {start}-{end} ({pk})".format(
             name=self.name, start=self.start_str, end=self.end_str, pk=self.pk)

@@ -16,7 +16,7 @@ class AddressRecordForm(DNSForm, RangeWizard, UsabilityFormMixin):
         model = AddressRecord
         exclude = ('ip_upper', 'ip_lower', 'reverse_domain', 'fqdn')
         fields = ('label', 'domain', 'ip_type', 'ip_str', 'views', 'ttl',
-                  'description')
+                  'description', 'last_save_user', 'log')
         widgets = {'views': forms.CheckboxSelectMultiple,
                    'ip_type': forms.RadioSelect}
 
@@ -24,6 +24,7 @@ class AddressRecordForm(DNSForm, RangeWizard, UsabilityFormMixin):
 class AddressRecordFQDNForm(AddressRecordForm):
     class Meta:
         model = AddressRecord
-        fields = ('fqdn', 'ip_type', 'ip_str', 'views', 'ttl', 'description')
+        fields = ('fqdn', 'ip_type', 'ip_str', 'views', 'ttl', 'description',
+                  'last_save_user', 'log')
         widgets = {'views': forms.CheckboxSelectMultiple,
                    'ip_type': forms.RadioSelect}

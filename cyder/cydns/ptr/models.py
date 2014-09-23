@@ -3,6 +3,7 @@ from gettext import gettext as _
 from django.db import models
 from django.core.exceptions import ValidationError
 
+from cyder.base.models import LoggedModel
 from cyder.cydhcp.range.utils import find_range
 from cyder.cydns.domain.models import Domain, name_to_domain
 from cyder.cydns.ip.models import Ip
@@ -73,7 +74,7 @@ class BasePTR(object):
         return ip_to_dns_form(self.ip_str)
 
 
-class PTR(BasePTR, Ip, LabelDomainMixin, CydnsRecord):
+class PTR(LoggedModel, BasePTR, Ip, LabelDomainMixin, CydnsRecord):
     """
     A PTR is used to map an IP to a domain name.
 
@@ -95,6 +96,10 @@ class PTR(BasePTR, Ip, LabelDomainMixin, CydnsRecord):
         app_label = 'cyder'
         db_table = 'ptr'
         unique_together = ('ip_str', 'ip_type', 'fqdn')
+
+    def serializer(self):
+        from cyder.cydns.ptr.log_serializer import PTRLogSerializer
+        return PTRLogSerializer(self)
 
     def __str__(self):
         return "{0} {1} {2}".format(str(self.ip_str), 'PTR', self.fqdn)

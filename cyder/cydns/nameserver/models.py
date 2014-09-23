@@ -4,6 +4,7 @@ from gettext import gettext as _
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import models
 
+from cyder.base.models import LoggedModel
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
@@ -12,7 +13,7 @@ from cyder.cydns.view.models import View
 from cyder.cydns.models import CydnsRecord
 
 
-class Nameserver(CydnsRecord):
+class Nameserver(LoggedModel, CydnsRecord):
     """
     Name server for forward domains::
 
@@ -56,6 +57,11 @@ class Nameserver(CydnsRecord):
         app_label = 'cyder'
         db_table = "nameserver"
         unique_together = ("domain", "server")
+
+    def serializer(self):
+        from cyder.cydns.nameserver.log_serializer import \
+            NameserverLogSerializer
+        return NameserverLogSerializer(self)
 
     def __str__(self):
         return self.bind_render_record()

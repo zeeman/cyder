@@ -2,6 +2,7 @@ from gettext import gettext as _
 
 from django.db import models
 
+from cyder.base.models import LoggedModel
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.validation import (
     validate_srv_label, validate_srv_port, validate_srv_priority,
@@ -10,7 +11,7 @@ from cyder.cydns.validation import (
 from cyder.cydns.models import CydnsRecord
 
 
-class SRV(CydnsRecord):
+class SRV(LoggedModel, CydnsRecord):
     """
     >>> SRV(label=label, domain=domain, target=target, port=port,
     ... priority=priority, weight=weight, ttl=ttl)
@@ -46,6 +47,10 @@ class SRV(CydnsRecord):
                  "{target:$extra_just}.")
 
     search_fields = ("fqdn", "target")
+
+    def serializer(self):
+        from cyder.cydns.srv.log_serializer import SRVLogSerializer
+        return SRVLogSerializer(self)
 
     def details(self):
         """For tables."""

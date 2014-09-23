@@ -7,6 +7,7 @@ from cyder.cydns.cname.models import CNAME
 from cyder.cydns.ip.models import Ip
 from cyder.cydns.models import CydnsRecord, LabelDomainMixin
 from cyder.base.constants import IP_TYPE_6, IP_TYPE_4
+from cyder.base.models import LoggedModel
 from cyder.cydhcp.range.utils import find_range
 
 
@@ -130,7 +131,7 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
             return 'AAAA'
 
 
-class AddressRecord(BaseAddressRecord):
+class AddressRecord(LoggedModel, BaseAddressRecord):
     """
     AddressRecord is the class that generates A and AAAA records
 
@@ -151,6 +152,11 @@ class AddressRecord(BaseAddressRecord):
         db_table = "address_record"
         unique_together = ("label", "domain", "fqdn", "ip_upper", "ip_lower",
                            "ip_type")
+
+    def serializer(self):
+        from cyder.cydns.address_record.log_serializer import \
+            AddressRecordLogSerializer
+        return AddressRecordLogSerializer(self)
 
     def details(self):
         """For tables."""

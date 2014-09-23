@@ -10,7 +10,7 @@ from cyder.base.models import BaseModel, LoggedModel
 from cyder.cydhcp.utils import networks_to_Q
 
 
-class Site(LoggedModel, BaseModel, ObjectUrlMixin):
+class Site(BaseModel, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255,
                             validators=[RegexValidator('^[^/]+$')])

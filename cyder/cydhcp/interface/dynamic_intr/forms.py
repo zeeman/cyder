@@ -18,7 +18,7 @@ class DynamicInterfaceForm(RangeWizard, UsabilityFormMixin):
 
     class Meta:
         model = DynamicInterface
-        exclude = ('last_seen',)
+        exclude = ('last_seen', 'last_save_user', 'log')
         always_validate = ('mac',)
 
 

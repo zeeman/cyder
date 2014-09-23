@@ -85,6 +85,11 @@ class StaticInterface(LoggedModel, BaseAddressRecord, BasePTR, ExpirableMixin):
         db_table = 'static_interface'
         unique_together = (('ip_upper', 'ip_lower'), ('label', 'domain'))
 
+    def serializer(self):
+        from cyder.cydhcp.interface.static_intr.log_serializer import \
+            StaticInterfaceLogSerializer
+        return StaticInterfaceLogSerializer(self)
+
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
         objects = objects or StaticInterface.objects

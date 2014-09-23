@@ -15,6 +15,7 @@ class UserProfile(BaseModel, ObjectUrlMixin):
 
     has_perm = backends.has_perm
     search_fields = ('user__username', 'user__first_name', 'user__last_name')
+    display_fields = ('user__username', 'user__first_name', 'user__last_name')
 
     class Meta:
         app_label = 'cyder'

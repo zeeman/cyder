@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import get_model
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
+from cyder.base.models import LoggedModel
 from cyder.cydns.models import CydnsRecord, LabelDomainMixin
 from cyder.cydns.validation import validate_fqdn
 from cyder.cydns.search_utils import smart_fqdn_exists
@@ -9,7 +10,7 @@ from cyder.cydns.search_utils import smart_fqdn_exists
 from gettext import gettext as _
 
 
-class CNAME(LabelDomainMixin, CydnsRecord):
+class CNAME(LoggedModel, LabelDomainMixin, CydnsRecord):
     """
     CNAMES can't point to an any other records. Said another way,
     CNAMES can't be at the samle level as any other record. This means
@@ -37,6 +38,10 @@ class CNAME(LabelDomainMixin, CydnsRecord):
         app_label = 'cyder'
         db_table = 'cname'
         unique_together = ('domain', 'label')
+
+    def serializer(self):
+        from cyder.cydns.cname.log_serializer import CNAMELogSerializer
+        return CNAMELogSerializer(self)
 
     def __str__(self):
         return "{0} CNAME {1}".format(self.fqdn, self.target)
