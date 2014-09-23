@@ -9,8 +9,8 @@ class SOAForm(ModelForm, UsabilityFormMixin):
         model = SOA
         fields = ('root_domain', 'primary', 'contact', 'expire',
                   'retry', 'refresh', 'minimum', 'ttl', 'description',
-                  'is_signed', 'dns_enabled', 'last_save_user', 'log')
-        exclude = ('serial', 'dirty',)
+                  'is_signed', 'dns_enabled')
+        exclude = ('serial', 'dirty', 'last_save_user', 'log')
 
 
 SOAAVForm = get_eav_form(SOAAV, SOA)

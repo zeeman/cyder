@@ -8,10 +8,9 @@ from cyder.base.mixins import UsabilityFormMixin
 class SSHFPForm(DNSForm, UsabilityFormMixin):
     class Meta:
         model = SSHFP
-        exclude = ('fqdn',)
+        exclude = ('fqdn', 'last_save_user', 'log')
         fields = ('label', 'domain', 'key', 'algorithm_number',
-                  'fingerprint_type', 'views', 'ttl', 'description',
-                  'last_save_user', 'log')
+                  'fingerprint_type', 'views', 'ttl', 'description',)
         widgets = {'views': forms.CheckboxSelectMultiple}
 
 

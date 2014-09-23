@@ -7,9 +7,9 @@ from cyder.base.mixins import UsabilityFormMixin
 class MXForm(DNSForm, UsabilityFormMixin):
     class Meta:
         model = MX
-        exclude = ('fqdn',)
+        exclude = ('fqdn', 'last_save_user', 'log')
         fields = ('label', 'domain', 'server', 'priority', 'views', 'ttl',
-                  'description', 'last_save_user', 'log')
+                  'description')
         widgets = {'views': forms.CheckboxSelectMultiple}
 
 

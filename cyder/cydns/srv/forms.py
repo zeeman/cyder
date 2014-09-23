@@ -8,9 +8,9 @@ from cyder.base.mixins import UsabilityFormMixin
 class SRVForm(DNSForm, UsabilityFormMixin):
     class Meta:
         model = SRV
-        exclude = ('fqdn',)
+        exclude = ('fqdn', 'last_save_user', 'log')
         fields = ('label', 'domain', 'target', 'port', 'priority', 'weight',
-                 'views', 'ttl', 'description', 'last_save_user', 'log')
+                 'views', 'ttl', 'description')
         widgets = {'views': forms.CheckboxSelectMultiple}
 
 
