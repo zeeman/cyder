@@ -156,11 +156,14 @@ def cy_view(request, template, pk=None, obj_type=None):
                 if perm(request, ACTION_CREATE, obj=obj, obj_class=Klass):
                     if isinstance(obj, LoggedModel):
                         obj = form.save(commit=False)
-                        if 'become_user_stack' in request.session:
-                            obj.last_save_user = \
-                                request.session.become_user_stack[0]
-                        else:
-                            obj.last_save_user = request.user
+                        obj.last_save_user = getattr(
+                            request.session, 'become_user_stack',
+                            [request.user])[0]
+                        # if 'become_user_stack' in request.session:
+                        #     obj.last_save_user = \
+                        #         request.session.become_user_stack[0]
+                        # else:
+                        #     obj.last_save_user = request.user
                         obj.save()
                     else:
                         obj = form.save()
@@ -295,12 +298,7 @@ def generate_log(obj):
     if not obj.log:
         return None
 
-    entries = [json.loads(e) for e in obj.log.split('\n') if e]
-    if entries:
-        cols = set.union(*[set(e.keys()) for e in entries if e])
-        return {'cols': cols, 'entries': entries}
-    else:
-        return None
+    return [json.loads(e) for e in obj.log.split('\n') if e]
 
 
 def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None, **kwargs):

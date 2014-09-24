@@ -80,6 +80,26 @@ def dict_merge(*dicts):
     return dict(reduce(lambda x,y: x + y.items(), dicts, []))
 
 
+def dict_diff(a, b):
+    """
+    Returns a dict containing the data from a that is different or missing in
+    b. Keys in a that are not in b will be reproduced in the result, as will
+    keys in a which have a different value from the same key in b. Keys with
+    dict values will be analyzed recursively.
+    """
+    changes = {}
+
+    for key in a.keys():
+        if key not in b:
+            changes[key] = a[key]
+        elif isinstance(a[key], dict) and isinstance(b[key], dict):
+            changes[key] = dict_diff(a[key], b[key])
+        elif a[key] != b[key]:
+            changes[key] = a[key]
+
+    return changes
+
+
 def make_paginator(request, qs, num=20, obj_type=None):
     """
     Paginator, returns object_list.

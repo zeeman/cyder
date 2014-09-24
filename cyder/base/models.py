@@ -1,3 +1,5 @@
+import datetime
+import simplejson as json
 from django.contrib.auth.models import User
 from django.core import serializers
 from django.db import models
@@ -5,7 +7,7 @@ from django.utils.safestring import mark_safe
 
 from rest_framework.renderers import JSONRenderer
 
-from cyder.base.utils import classproperty
+from cyder.base.utils import classproperty, dict_diff
 from cyder.settings.local import MAX_LOG_ENTRIES
 
 class DeleteLog(models.Model):
@@ -35,16 +37,30 @@ class LoggedModel(models.Model):
         raise NotImplementedError("This model inherits from LoggedModel, but "
                                   "it doesn't specify a serializer to use")
 
-    def serialized(self):
-        return JSONRenderer().render(self.serializer().data)
+    def serialized(self, old):
+        data = self.serializer().data
+        old_data = old.serializer().data
+        changes = dict_diff(old_data, data)
+
+        # these keys will be stored at the top level of the dict, so they
+        # don't need to be reproduced in the list of changes
+        changes.pop('last_save_user', None)
+        changes.pop('modified', None)
+
+        return JSONRenderer().render({
+            'last_save_user': data['last_save_user'],
+            'modified': datetime.datetime.now(),
+            'changes': changes
+        })
 
     def save(self, *args, **kwargs):
         # only update the log if the record has already been saved
         if self.pk:
+            old_data = self.__class__.objects.get(pk=self.pk)
             log_lines = self.log.split('\n')
 
             # get the serialized representation, prepend it to the log
-            log_lines.insert(0, self.serialized())
+            log_lines.insert(0, self.serialized(old_data))
 
             # remove log entries if we're over the limit
             if len(log_lines) > MAX_LOG_ENTRIES:

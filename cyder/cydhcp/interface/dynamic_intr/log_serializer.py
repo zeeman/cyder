@@ -1,9 +1,9 @@
 from rest_framework import serializers
-from cyder.base.log_serializer import BaseLogSerializer
+from cyder.base.log_serializer import BaseLogSerializer, ExpirableLogMixin
 from cyder.models import DynamicInterface
 
 
-class DynamicInterfaceLogSerializer(BaseLogSerializer):
+class DynamicInterfaceLogSerializer(BaseLogSerializer, ExpirableLogMixin):
     ctnr = serializers.SlugRelatedField(slug_field='name')
     workgroup = serializers.SlugRelatedField(slug_field='name')
     system = serializers.SlugRelatedField(slug_field='name')
