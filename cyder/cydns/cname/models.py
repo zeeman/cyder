@@ -37,7 +37,7 @@ class CNAME(LoggedModel, LabelDomainMixin, CydnsRecord):
     class Meta:
         app_label = 'cyder'
         db_table = 'cname'
-        unique_together = ('domain', 'label')
+        unique_together = ('label', 'domain', 'target')
 
     def serializer(self):
         from cyder.cydns.cname.log_serializer import CNAMELogSerializer
@@ -77,8 +77,21 @@ class CNAME(LoggedModel, LabelDomainMixin, CydnsRecord):
         super(CNAME, self).clean(*args, **kwargs)
         if self.fqdn == self.target:
             raise ValidationError("CNAME loop detected.")
+        self.check_roundrobin_condition()
         self.check_SOA_condition()
         self.existing_node_check()
+
+    def check_roundrobin_condition(self):
+        """
+        Allow CNAMEs with the same name iff they share the same container.
+        """
+        existing = (CNAME.objects.filter(label=self.label, domain=self.domain)
+                                 .exclude(ctnr=self.ctnr))
+        if existing.exists():
+            raise ValidationError("Cannot create CNAME because another CNAME "
+                                  "with the name %s.%s already exists in a "
+                                  "different container." % (self.label,
+                                                            self.domain.name))
 
     def check_SOA_condition(self):
         """
@@ -136,7 +149,8 @@ class CNAME(LoggedModel, LabelDomainMixin, CydnsRecord):
         if qset:
             objects = qset.all()
             raise ValidationError(
-                "Objects with this name already exist: {0}".format(objects)
+                "Objects with this name already exist: {0}".format(
+                    ', '.join(unicode(object) for object in objects))
             )
 
         MX = get_model('cyder', 'MX')

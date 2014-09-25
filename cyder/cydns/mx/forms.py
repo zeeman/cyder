@@ -8,8 +8,8 @@ class MXForm(DNSForm, UsabilityFormMixin):
     class Meta:
         model = MX
         exclude = ('fqdn', 'last_save_user', 'log')
-        fields = ('label', 'domain', 'server', 'priority', 'views', 'ttl',
-                  'description')
+        fields = ('label', 'domain', 'server', 'priority', 'views',
+                  'ttl', 'description', 'ctnr')
         widgets = {'views': forms.CheckboxSelectMultiple}
 
 

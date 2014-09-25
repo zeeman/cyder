@@ -49,6 +49,9 @@ class Vlan(LoggedModel, BaseModel, ObjectUrlMixin):
         objects = objects or Vlan.objects
         return objects.filter(network__in=networks)
 
+    def check_in_ctnr(self, ctnr):
+        return self.network_set.filter(range__in=ctnr.ranges.all()).exists()
+
     def details(self):
         """For tables."""
         data = super(Vlan, self).details()
