@@ -160,6 +160,7 @@ def cy_view(request, template, pk=None, obj_type=None):
                             request.session, 'become_user_stack',
                             [request.user])[0]
                         obj.save()
+                        form.save_m2m()
                     else:
                         obj = form.save()
 

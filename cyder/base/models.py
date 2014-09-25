@@ -34,6 +34,12 @@ class LoggedModel(models.Model):
         abstract = True
 
     def serializer(self):
+        """
+        Should call a Django REST Framework serializer on self and return the
+        result. This is a function to avoid a circular import where the
+        serializer file imports the model and the model file imports the
+        serializer at the top level.
+        """
         raise NotImplementedError("This model inherits from LoggedModel, but "
                                   "it doesn't specify a serializer to use")
 

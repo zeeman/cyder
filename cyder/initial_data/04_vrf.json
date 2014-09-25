@@ -3,16 +3,14 @@
     "pk": 1,
     "model": "cyder.vrf",
     "fields": {
-      "name": "Legacy",
-      "log": ""
+      "name": "Legacy"
     }
   },
   {
     "pk": 2,
     "model": "cyder.vrf",
     "fields": {
-      "name": "VoIP",
-      "log": ""
+      "name": "VoIP"
     }
   }
 ]
