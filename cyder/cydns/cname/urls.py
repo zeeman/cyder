@@ -4,5 +4,5 @@ from cyder.cydns.urls import cydns_urls
 from cyder.cydns.cname.views import cname_detail
 
 
-urlpatterns = cydns_urls('cname') + [url(r'(?P<pk>[\w-]+)/$',
-                                         cname_detail, name='cname-detail')]
+urlpatterns = cydns_urls('cname') + \
+    [url(r'(?P<pk>[\w-]+)/$', cname_detail, name='cname-detail')]

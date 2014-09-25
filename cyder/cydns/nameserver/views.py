@@ -3,11 +3,16 @@ from django.forms.util import ErrorList, ErrorDict
 from django.shortcuts import (get_object_or_404, render, render_to_response,
                               redirect)
 
+from cyder.base.views import cy_detail
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.nameserver.forms import (Nameserver, NameserverForm,
                                           NSDelegated)
 from cyder.cydns.views import *
+
+
+def nameserver_detail(request, pk):
+    return cy_detail(request, Nameserver, 'cydns/cydns_detail.html', {}, pk=pk)
 
 
 class NSView(object):
