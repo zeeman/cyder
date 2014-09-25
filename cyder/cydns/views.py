@@ -51,7 +51,6 @@ def cydns_view(request, pk=None):
         try:
             if perm(request, ACTION_CREATE, obj=obj, obj_class=Klass):
                 if isinstance(obj, LoggedModel):
-                    import pudb; pudb.set_trace()
                     obj = form.save(commit=False)
                     obj.last_save_user = getattr(
                         request.session, 'become_user_stack',

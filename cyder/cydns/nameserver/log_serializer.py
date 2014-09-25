@@ -10,8 +10,7 @@ class NameserverLogSerializer(BaseLogSerializer):
 
     class Meta:
         model = Nameserver
-        fields = ('domain', 'server', 'addr_glue', 'intr_glue', 'ttl',
-                  'last_save_user', 'description')
+        fields = ('domain', 'server', 'ttl', 'last_save_user', 'description')
 
     def addr_glue_repr(self, obj):
         return str(obj.addr_glue)

@@ -6,4 +6,5 @@ from cyder.models import TXT
 class TXTLogSerializer(BaseLogSerializer):
     class Meta:
         model = TXT
-        fields = 'fqdn', 'txt_data', 'last_save_user'
+        fields = ('fqdn', 'txt_data', 'ttl', 'description', 'ctnr',
+                  'last_save_user')

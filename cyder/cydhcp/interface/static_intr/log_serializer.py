@@ -13,4 +13,5 @@ class StaticInterfaceLogSerializer(BaseLogSerializer):
     class Meta:
         model = StaticInterface
         fields = ('ctnr', 'mac', 'reverse_domain', 'system', 'workgroup',
-                  'dhcp_enabled', 'dns_enabled', 'ip_str', 'last_save_user')
+                  'dhcp_enabled', 'dns_enabled', 'ip_str', 'last_save_user',
+                  'description', 'expire')

@@ -96,6 +96,9 @@ def dict_diff(a, b):
             changes[key] = dict_diff(a[key], b[key])
         elif a[key] != b[key]:
             changes[key] = a[key]
+    for key in b.keys():
+        if key not in a:
+            b[key] = ""
 
     return changes
 
