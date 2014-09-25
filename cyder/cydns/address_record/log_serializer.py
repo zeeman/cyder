@@ -6,4 +6,4 @@ from cyder.models import AddressRecord
 class AddressRecordLogSerializer(BaseLogSerializer):
     class Meta:
         model = AddressRecord
-        fields = "fqdn", "ip_str", 'last_save_user'
+        fields = ("fqdn", "ip_str", "last_save_user", "ttl", "description",)

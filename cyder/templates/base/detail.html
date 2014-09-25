@@ -61,3 +61,32 @@
     {% endif %}
   {% endfor %}
 {% endblock %}
+
+{% block extra_content %}
+{% if log_entries %}
+<h2>Recent changes</h2>
+<table class="table">
+    <thead>
+    <th>User</th>
+    <th>Date</th>
+    <th>Changed Values</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for entry in log_entries %}
+    <tr>
+        <td>{{ entry['last_save_user'] }}</td>
+        <td>{{ entry['modified'] }}</td>
+        <td>
+            <ul>
+            {% for col in entry['changes'] %}
+                <li><b>{{ col }}:</b> {{ entry['changes'][col] }}</li>
+            {% endfor %}
+            </ul>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% endblock %}

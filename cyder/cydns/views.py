@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from cyder.base.constants import ACTION_CREATE, get_klasses
 from cyder.base.mixins import UsabilityFormMixin
+from cyder.base.models import LoggedModel
 from cyder.base.helpers import do_sort
 from cyder.base.utils import (make_paginator, _filter, tablefy)
 from cyder.base.views import (BaseCreateView, BaseDeleteView,
@@ -47,7 +48,15 @@ def cydns_view(request, pk=None):
             form = FormKlass(qd, instance=obj)
         try:
             if perm(request, ACTION_CREATE, obj=obj, obj_class=Klass):
-                obj = form.save()
+                if isinstance(obj, LoggedModel):
+                    obj = form.save(commit=False)
+                    obj.last_save_user = getattr(
+                        request.session, 'become_user_stack',
+                        [request.user])[0]
+                    obj.save()
+                else:
+                    obj = form.save()
+
                 # If domain, add to current ctnr.
                 if is_ajax_form(request):
                     return HttpResponse(json.dumps({'success': True}))

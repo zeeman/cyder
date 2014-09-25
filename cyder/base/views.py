@@ -159,11 +159,6 @@ def cy_view(request, template, pk=None, obj_type=None):
                         obj.last_save_user = getattr(
                             request.session, 'become_user_stack',
                             [request.user])[0]
-                        # if 'become_user_stack' in request.session:
-                        #     obj.last_save_user = \
-                        #         request.session.become_user_stack[0]
-                        # else:
-                        #     obj.last_save_user = request.user
                         obj.save()
                     else:
                         obj = form.save()
@@ -210,8 +205,8 @@ def cy_view(request, template, pk=None, obj_type=None):
         'obj_type': obj_type,
         'pretty_obj_type': Klass.pretty_type,
         'pk': pk,
-        'log_entries': ([json.loads(e) for e in obj.log.split('\n')]
-                        if hasattr(obj, 'log') else None)
+        'log_entries': (generate_log(obj) if isinstance(obj, LoggedModel)
+                        else None)
     })
 
 

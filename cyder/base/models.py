@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import simplejson as json
 from django.contrib.auth.models import User
 from django.core import serializers
@@ -49,7 +49,7 @@ class LoggedModel(models.Model):
 
         return JSONRenderer().render({
             'last_save_user': data['last_save_user'],
-            'modified': datetime.datetime.now(),
+            'modified': datetime.now().strftime("%m/%d/%Y %H:%M:%S"),
             'changes': changes
         })
 

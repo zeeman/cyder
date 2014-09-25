@@ -1,14 +1,15 @@
 from rest_framework import serializers
-from cyder.base.log_serializer import BaseLogSerializer, ExpirableLogMixin
+from cyder.base.log_serializer import BaseLogSerializer
 from cyder.models import DynamicInterface
 
 
-class DynamicInterfaceLogSerializer(BaseLogSerializer, ExpirableLogMixin):
+class DynamicInterfaceLogSerializer(BaseLogSerializer):
     ctnr = serializers.SlugRelatedField(slug_field='name')
     workgroup = serializers.SlugRelatedField(slug_field='name')
     system = serializers.SlugRelatedField(slug_field='name')
     range = serializers.SerializerMethodField('get_range_representation')
     last_save_user = serializers.SlugRelatedField(slug_field='username')
+    expire = serializers.DateTimeField(format="%m/%d/%Y")
 
     class Meta:
         model = DynamicInterface
