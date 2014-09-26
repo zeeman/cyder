@@ -8,5 +8,6 @@ class SSHFPLogSerializer(BaseLogSerializer):
 
     class Meta:
         model = SSHFP
-        fields = ('fqdn', 'key', 'algorithm_number', 'fingerprint_type',
-                  'last_save_user', 'ttl', 'description', 'ctnr')
+        fields = ('label', 'domain', 'key', 'algorithm_number',
+                  'fingerprint_type', 'ttl', 'description', 'ctnr',
+                  'last_save_user')

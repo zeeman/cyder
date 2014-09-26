@@ -7,8 +7,10 @@ class NetworkLogSerializer(BaseLogSerializer):
     vlan = serializers.SlugRelatedField(slug_field='name')
     site = serializers.SlugRelatedField(slug_field='name')
     vrf = serializers.SlugRelatedField(slug_field='name')
+    network_address = serializers.CharField(source='network_str')
+    dhcp_config_extras = serializers.CharField(source='dhcpd_raw_include')
 
     class Meta:
         model = Network
-        fields = ('vlan', 'site', 'vrf', 'ip_type', 'network_str', 'prefixlen',
-                  'enabled', 'dhcpd_raw_include', 'last_save_user')
+        fields = ('vlan', 'site', 'vrf', 'ip_type', 'network_address',
+                  'enabled', 'dhcp_config_extras', 'last_save_user')

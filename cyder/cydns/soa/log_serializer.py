@@ -8,6 +8,6 @@ class SOALogSerializer(BaseLogSerializer):
 
     class Meta:
         model = SOA
-        fields = ('ttl', 'primary', 'contact', 'serial', 'expire', 'retry',
-                  'refresh', 'minimum', 'description', 'root_domain', 'dirty',
-                  'is_signed', 'dns_enabled', 'last_save_user')
+        fields = ('root_domain', 'primary', 'contact', 'expire', 'retry',
+                  'refresh', 'minimum', 'ttl', 'description', 'is_signed',
+                  'dns_enabled', 'last_save_user')

@@ -4,7 +4,7 @@ from cyder.models import DynamicInterface
 
 
 class DynamicInterfaceLogSerializer(BaseLogSerializer):
-    ctnr = serializers.SlugRelatedField(slug_field='name')
+    container = serializers.SlugRelatedField(slug_field='name', source='ctnr')
     workgroup = serializers.SlugRelatedField(slug_field='name')
     system = serializers.SlugRelatedField(slug_field='name')
     range = serializers.SerializerMethodField('get_range_representation')
@@ -13,7 +13,7 @@ class DynamicInterfaceLogSerializer(BaseLogSerializer):
 
     class Meta:
         model = DynamicInterface
-        fields = ('ctnr', 'workgroup', 'system', 'mac', 'range',
+        fields = ('container', 'workgroup', 'system', 'mac', 'range',
                   'dhcp_enabled', 'expire', 'last_save_user')
     
     def get_range_representation(self, obj):
