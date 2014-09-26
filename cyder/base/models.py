@@ -1,7 +1,5 @@
 from datetime import datetime
-import simplejson as json
 from django.contrib.auth.models import User
-from django.core import serializers
 from django.db import models
 from django.utils.safestring import mark_safe
 
@@ -9,6 +7,7 @@ from rest_framework.renderers import JSONRenderer
 
 from cyder.base.utils import classproperty, dict_diff
 from cyder.settings.local import MAX_LOG_ENTRIES
+
 
 class DeleteLog(models.Model):
     obj_type = models.CharField(max_length=30)
@@ -53,11 +52,14 @@ class LoggedModel(models.Model):
         changes.pop('last_save_user', None)
         changes.pop('modified', None)
 
-        return JSONRenderer().render({
-            'last_save_user': data['last_save_user'],
-            'modified': datetime.now().strftime("%m/%d/%Y %H:%M:%S"),
-            'changes': changes
-        })
+        if len(changes):
+            return JSONRenderer().render({
+                'last_save_user': data['last_save_user'],
+                'modified': datetime.now().strftime("%m/%d/%Y %H:%M:%S"),
+                'changes': changes
+            })
+        else:
+            return None  # no changes have been made
 
     def save(self, *args, **kwargs):
         # only update the log if the record has already been saved
@@ -65,14 +67,18 @@ class LoggedModel(models.Model):
             old_data = self.__class__.objects.get(pk=self.pk)
             log_lines = self.log.split('\n')
 
-            # get the serialized representation, prepend it to the log
-            log_lines.insert(0, self.serialized(old_data))
+            # get the serialized representation
+            change_log = self.serialized(old_data)
 
-            # remove log entries if we're over the limit
-            if len(log_lines) > MAX_LOG_ENTRIES:
-                log_lines = log_lines[:MAX_LOG_ENTRIES]
+            # don't update the log if there are no changes
+            if change_log is not None:
+                log_lines.insert(0, change_log)
 
-            self.log = '\n'.join(log_lines)
+                # remove log entries if we're over the limit
+                if len(log_lines) > MAX_LOG_ENTRIES:
+                    log_lines = log_lines[:MAX_LOG_ENTRIES]
+
+                self.log = '\n'.join(log_lines)
 
         return super(LoggedModel, self).save(*args, **kwargs)
 
@@ -83,6 +89,7 @@ class LoggedModel(models.Model):
                        user=user)
         dl.save()
         return super(LoggedModel, self).delete(*args, **kwargs)
+
 
 class BaseModel(models.Model):
     """
