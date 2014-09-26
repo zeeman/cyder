@@ -9,4 +9,4 @@ class SRVLogSerializer(BaseLogSerializer):
     class Meta:
         model = SRV
         fields = ('fqdn', 'target', 'port', 'priority', 'weight',
-                  'ttl', 'description', 'ctnr')
+                  'ttl', 'description', 'ctnr', 'last_save_user')

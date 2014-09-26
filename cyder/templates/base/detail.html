@@ -80,7 +80,14 @@
         <td>
             <ul>
             {% for col in entry['changes'] %}
-                <li><b>{{ col }}:</b> {{ entry['changes'][col] }}</li>
+                <li>
+                    <b>{{ col }}:</b>
+                    {% if entry['changes'][col] == "" %}
+                    <i>(empty)</i>
+                    {% else %}
+                    {{ entry['changes'][col] }}
+                    {% endif %}
+                </li>
             {% endfor %}
             </ul>
         </td>
