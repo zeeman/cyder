@@ -14,8 +14,7 @@ class DynamicInterfaceLogSerializer(BaseLogSerializer):
     class Meta:
         model = DynamicInterface
         fields = ('ctnr', 'workgroup', 'system', 'mac', 'range',
-                  'dhcp_enabled', 'last_seen', 'modified', 'expire',
-                  'last_save_user')
+                  'dhcp_enabled', 'expire', 'last_save_user')
     
     def get_range_representation(self, obj):
         return obj.range.audit_repr()
