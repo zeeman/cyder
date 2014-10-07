@@ -5,8 +5,9 @@ from cyder.models import CNAME
 
 class CNAMELogSerializer(BaseLogSerializer):
     domain = serializers.SlugRelatedField(slug_field="name")
+    time_to_live = serializers.IntegerField(source="ttl")
 
     class Meta:
         model = CNAME
         fields = ('label', 'domain', 'target', 'last_save_user', 'description',
-                  'ttl')
+                  'time_to_live')

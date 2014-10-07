@@ -6,8 +6,9 @@ from cyder.models import TXT
 
 class TXTLogSerializer(BaseLogSerializer):
     domain = serializers.SlugRelatedField(slug_field="name")
+    time_to_live = serializers.IntegerField(source="ttl")
 
     class Meta:
         model = TXT
-        fields = ('label', 'domain', 'txt_data', 'ttl', 'description', 'ctnr',
-                  'last_save_user')
+        fields = ('label', 'domain', 'txt_data', 'time_to_live', 'description',
+                  'ctnr', 'last_save_user')
