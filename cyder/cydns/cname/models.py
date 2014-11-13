@@ -1,13 +1,14 @@
+from gettext import gettext as _
+
 from django.db import models
 from django.db.models import get_model
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 from cyder.base.models import LoggedModel
+from cyder.base.utils import safe_save
 from cyder.cydns.models import CydnsRecord, LabelDomainMixin
 from cyder.cydns.validation import validate_fqdn
 from cyder.cydns.search_utils import smart_fqdn_exists
-
-from gettext import gettext as _
 
 
 class CNAME(LoggedModel, LabelDomainMixin, CydnsRecord):
@@ -69,8 +70,8 @@ class CNAME(LoggedModel, LabelDomainMixin, CydnsRecord):
     def rdtype(self):
         return 'CNAME'
 
+    @safe_save
     def save(self, *args, **kwargs):
-        self.clean()
         super(CNAME, self).save(*args, **kwargs)
 
     def clean(self, *args, **kwargs):
