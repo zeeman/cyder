@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import models
 
 from cyder.base.models import LoggedModel
-from cyder.base.utils import safe_delete, safe_save
+from cyder.base.utils import transaction_atomic
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.domain.models import Domain
@@ -65,8 +65,8 @@ class Nameserver(LoggedModel, CydnsRecord):
             NameserverLogSerializer
         return NameserverLogSerializer(self)
 
-    def __str__(self):
-        return self.bind_render_record()
+    def __unicode__(self):
+        return u'{} NS {}'.format(self.domain.name, self.server)
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
@@ -129,7 +129,7 @@ class Nameserver(LoggedModel, CydnsRecord):
                              "either type AddressRecord or type "
                              "StaticInterface.".format(glue))
 
-    @safe_delete
+    @transaction_atomic
     def del_glue(self):
         if self.addr_glue:
             self.addr_glue.delete(commit=False)
@@ -144,13 +144,15 @@ class Nameserver(LoggedModel, CydnsRecord):
         super(Nameserver, self).__init__(*args, **kwargs)
         self.ctnr = Ctnr.objects.get(name="global")
 
-    @safe_delete
+    @transaction_atomic
     def delete(self, *args, **kwargs):
         self.check_no_ns_soa_condition(self.domain)
         super(Nameserver, self).delete(*args, **kwargs)
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         super(Nameserver, self).save(*args, **kwargs)
 
     def clean(self, *args, **kwargs):

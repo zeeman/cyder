@@ -5,19 +5,8 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 from cyder.base.models import LoggedModel
-from cyder.base.utils import safe_save
+from cyder.base.utils import transaction_atomic
 from cyder.cydns.models import CydnsRecord, LabelDomainMixin
-
-
-def validate_algorithm(number):
-    if number not in (1, 2):
-        raise ValidationError(
-            "Algorithm number must be with 1 (RSA) or 2 (DSA)")
-
-
-def validate_fingerprint(number):
-    if number not in (1,):
-        raise ValidationError("Fingerprint type must be 1 (SHA-1)")
 
 
 is_sha1 = re.compile("[0-9a-fA-F]{40}")
@@ -39,11 +28,10 @@ class SSHFP(LoggedModel, LabelDomainMixin, CydnsRecord):
     id = models.AutoField(primary_key=True)
     key = models.CharField(max_length=256, validators=[validate_sha1])
     algorithm_number = models.PositiveIntegerField(
-        null=False, blank=False, validators=[validate_algorithm],
-        help_text="Algorithm number must be with 1 (RSA) or 2 (DSA)")
+        null=False, blank=False, choices=((1, 'RSA (1)'), (2, 'DSA (2)')),
+        verbose_name='algorithm')
     fingerprint_type = models.PositiveIntegerField(
-        null=False, blank=False, validators=[validate_fingerprint],
-        help_text="Fingerprint type must be 1 (SHA-1)")
+        null=False, blank=False, default=1, choices=((1, 'SHA-1 (1)'),))
 
     template = _("{bind_name:$lhs_just} {ttl:$ttl_just}  "
                  "{rdclass:$rdclass_just} "
@@ -56,10 +44,6 @@ class SSHFP(LoggedModel, LabelDomainMixin, CydnsRecord):
         app_label = 'cyder'
         db_table = 'sshfp'
         unique_together = ('domain', 'label')
-        # TODO
-        # _mysql_exceptions.OperationalError: (1170, "BLOB/TEXT column
-        # 'txt_data' used in key specification without a key length")
-        # Fix that ^
 
     def serializer(self):
         from cyder.cydns.sshfp.log_serializer import SSHFPLogSerializer
@@ -67,15 +51,24 @@ class SSHFP(LoggedModel, LabelDomainMixin, CydnsRecord):
 
     def details(self):
         """For tables."""
+        algorithms = {1: 'RSA (1)', 2: 'DSA (2)'}
+        fingerprint_types = {1: 'SHA-1 (1)'}
         data = super(SSHFP, self).details()
         data['data'] = [
             ('Label', 'label', self.label),
             ('Domain', 'domain', self.domain),
-            ('Algorithm', 'algorithm_number', self.algorithm_number),
-            ('Fingerprint Type', 'fingerprint_type', self.fingerprint_type),
+            ('Algorithm', 'algorithm_number',
+                algorithms[self.algorithm_number]),
+            ('Fingerprint Type', 'fingerprint_type',
+                fingerprint_types[self.fingerprint_type]),
             ('Key', 'key', self.key),
         ]
         return data
+
+    def __unicode__(self):
+        return u'{} SSHFP {} {} {}...'.format(
+            self.fqdn, self.algorithm_number, self.fingerprint_type,
+            self.key[:8])
 
     @staticmethod
     def eg_metadata():
@@ -93,6 +86,8 @@ class SSHFP(LoggedModel, LabelDomainMixin, CydnsRecord):
     def rdtype(self):
         return 'SSHFP'
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         super(SSHFP, self).save(*args, **kwargs)

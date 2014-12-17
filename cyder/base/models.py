@@ -104,6 +104,9 @@ class BaseModel(models.Model):
         abstract = True
         get_latest_by = 'created'
 
+    def __str__(self):
+        return unicode(self).encode('ascii', 'replace')
+
     @classproperty
     @classmethod
     def pretty_type(cls):
@@ -139,6 +142,9 @@ class BaseModel(models.Model):
                 obj.get().get_detail_url(), obj.get())
             error = mark_safe(error)
         return error
+
+    def reload(self):
+        return self.__class__.objects.get(pk=self.pk)
 
 
 class ExpirableMixin(models.Model):

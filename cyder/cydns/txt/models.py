@@ -4,7 +4,7 @@ from string import Template
 from django.db import models
 
 from cyder.base.models import LoggedModel
-from cyder.base.utils import safe_save
+from cyder.base.utils import transaction_atomic
 from cyder.cydns.models import CydnsRecord, LabelDomainMixin
 from cyder.cydns.validation import validate_txt_data
 
@@ -45,6 +45,9 @@ class TXT(LoggedModel, LabelDomainMixin, CydnsRecord):
             ('Text', 'txt_data', self.txt_data)
         ]
         return data
+
+    def __unicode__(self):
+        return u'{} TXT {}'.format(self.fqdn, self.txt_data)
 
     @staticmethod
     def eg_metadata():
@@ -98,6 +101,8 @@ class TXT(LoggedModel, LabelDomainMixin, CydnsRecord):
             rdclass='IN', txt_data=txt_data
         )
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         super(TXT, self).save(*args, **kwargs)

@@ -5,10 +5,9 @@ from django.db.models.loading import get_model
 from cyder.base.eav.constants import ATTRIBUTE_INVENTORY
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
-from cyder.base.helpers import get_display
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
-from cyder.base.utils import safe_delete, safe_save
+from cyder.base.utils import transaction_atomic
 from cyder.core.system.validators import validate_no_spaces
 
 
@@ -18,10 +17,10 @@ class System(BaseModel, ObjectUrlMixin):
         validators=[validate_no_spaces])
 
     search_fields = ('name',)
-    display_fields = ('name',)
+    sort_fields = ('name',)
 
-    def __str__(self):
-        return get_display(self)
+    def __unicode__(self):
+        return self.name
 
     def audit_repr(self):
         return "{} ({})".format(self.name, self.pk)
@@ -53,7 +52,7 @@ class System(BaseModel, ObjectUrlMixin):
         ]
         return data
 
-    @safe_delete
+    @transaction_atomic
     def delete(self, *args, **kwargs):
         DynamicInterface = get_model('cyder', 'dynamicinterface')
         for interface in DynamicInterface.objects.filter(system=self):
@@ -70,8 +69,10 @@ class System(BaseModel, ObjectUrlMixin):
             {'name': 'name', 'datatype': 'string', 'editable': True},
         ]}
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         super(System, self).save(*args, **kwargs)
 
 

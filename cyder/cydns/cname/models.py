@@ -5,7 +5,7 @@ from django.db.models import get_model
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 from cyder.base.models import LoggedModel
-from cyder.base.utils import safe_save
+from cyder.base.utils import transaction_atomic
 from cyder.cydns.models import CydnsRecord, LabelDomainMixin
 from cyder.cydns.validation import validate_fqdn
 from cyder.cydns.search_utils import smart_fqdn_exists
@@ -34,6 +34,7 @@ class CNAME(LoggedModel, LabelDomainMixin, CydnsRecord):
                  "{rdtype:$rdtype_just} {target:$rhs_just}.")
 
     search_fields = ('fqdn', 'target')
+    sort_fields = ('fqdn', 'target')
 
     class Meta:
         app_label = 'cyder'
@@ -44,8 +45,8 @@ class CNAME(LoggedModel, LabelDomainMixin, CydnsRecord):
         from cyder.cydns.cname.log_serializer import CNAMELogSerializer
         return CNAMELogSerializer(self)
 
-    def __str__(self):
-        return "{0} CNAME {1}".format(self.fqdn, self.target)
+    def __unicode__(self):
+        return u'{} CNAME {}'.format(self.fqdn, self.target)
 
     def details(self):
         """For tables."""
@@ -70,8 +71,10 @@ class CNAME(LoggedModel, LabelDomainMixin, CydnsRecord):
     def rdtype(self):
         return 'CNAME'
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         super(CNAME, self).save(*args, **kwargs)
 
     def clean(self, *args, **kwargs):
@@ -112,7 +115,7 @@ class CNAME(LoggedModel, LabelDomainMixin, CydnsRecord):
             return
         if self.fqdn == root_domain.name:
             raise ValidationError(
-                "You cannot create a CNAME who's left hand side is at the "
+                "You cannot create a CNAME whose left hand side is at the "
                 "same level as an SOA"
             )
 

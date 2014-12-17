@@ -8,9 +8,9 @@ from cyder.base.eav.constants import ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
-from cyder.base.helpers import get_display
+
 from cyder.base.models import BaseModel, LoggedModel
-from cyder.base.utils import safe_delete, safe_save
+from cyder.base.utils import transaction_atomic
 from cyder.cydhcp.constants import DYNAMIC
 from cyder.cydhcp.utils import IPFilter, join_dhcp_args
 from cyder.cydhcp.vlan.models import Vlan
@@ -57,6 +57,7 @@ class Network(LoggedModel, BaseModel, ObjectUrlMixin):
     audit_fields = ('id', 'vlan', 'site', 'vrf', 'ip_type', 'ip_upper',
                     'ip_lower', 'network_str', 'prefixlen', 'enabled',
                     'dhcpd_raw_include')
+    sort_fields = ('network_str',)
 
     class Meta:
         app_label = 'cyder'
@@ -67,11 +68,10 @@ class Network(LoggedModel, BaseModel, ObjectUrlMixin):
         from cyder.cydhcp.network.log_serializer import NetworkLogSerializer
         return NetworkLogSerializer(self)
 
-    def __str__(self):
-        return get_display(self)
-
     def __repr__(self):
         return "<Network {0}>".format(str(self))
+    def __unicode__(self):
+        return self.network_str
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
@@ -124,9 +124,10 @@ class Network(LoggedModel, BaseModel, ObjectUrlMixin):
             return super(Network, self).unique_error_message(
                 model_class, unique_check)
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
-        self.update_network()
+        self.full_clean()
+
         super(Network, self).save(*args, **kwargs)
 
         #if (self.pk is None and
@@ -142,7 +143,7 @@ class Network(LoggedModel, BaseModel, ObjectUrlMixin):
                             #value=router, network=self)
             #eav.save(commit=False)
 
-    @safe_delete
+    @transaction_atomic
     def delete(self, *args, **kwargs):
         if self.range_set.exists():
             raise ValidationError("Cannot delete this network because it has "
@@ -205,14 +206,15 @@ class Network(LoggedModel, BaseModel, ObjectUrlMixin):
         self.ipf = IPFilter(self.network.network, self.network.broadcast,
                             self.ip_type, object_=self)
 
-    def get_related_vlans(self, related_networks):
-        return set([network.vlan for network in related_networks])
+    @staticmethod
+    def get_related_vlans(networks):
+        return set([network.vlan for network in networks])
 
     def get_related_networks(self):
         from cyder.cydhcp.network.utils import calc_networks
         _, related_networks = calc_networks(self)
         networks = set(related_networks)
-        networks.update([self])
+        networks.add(self)
         while related_networks:
             subnets = set()
             for network in related_networks:
@@ -222,8 +224,10 @@ class Network(LoggedModel, BaseModel, ObjectUrlMixin):
             related_networks = subnets
         return networks
 
-    def get_related_sites(self, related_networks):
-        return set([network.site for network in related_networks])
+    def get_related_sites(self, networks=None):
+        if not networks:
+            networks = self.get_related_networks()
+        return set([network.site for network in networks]).discard(None)
 
     def build_subnet(self, raw=False):
         self.update_network()
@@ -312,7 +316,6 @@ class NetworkAV(EAVBase):
     class Meta(EAVBase.Meta):
         app_label = 'cyder'
         db_table = 'network_av'
-
 
     entity = models.ForeignKey(Network)
     attribute = EAVAttributeField(Attribute)

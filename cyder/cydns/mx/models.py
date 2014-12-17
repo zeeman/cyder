@@ -4,7 +4,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 from cyder.base.models import LoggedModel
-from cyder.base.utils import safe_save
+from cyder.base.utils import transaction_atomic
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.models import CydnsRecord, LabelDomainMixin
 from cyder.cydns.validation import validate_fqdn, validate_mx_priority
@@ -35,12 +35,12 @@ class MX(LoggedModel, LabelDomainMixin, CydnsRecord):
         from cyder.cydns.mx.log_serializer import MXLogSerializer
         return MXLogSerializer(self)
 
-    def __str__(self):
-        return "{0} {1} {3} {4} {5}".format(self.fqdn, self.ttl, 'IN', 'MX',
-                                            self.priority, self.server)
-
     def __repr__(self):
         return "<MX '{0}'>".format(str(self))
+
+    def __unicode__(self):
+        return u'{} MX {} {}'.format(self.fqdn, self.priority, self.server)
+
 
     def details(self):
         """For tables."""
@@ -69,8 +69,10 @@ class MX(LoggedModel, LabelDomainMixin, CydnsRecord):
     def rdtype(self):
         return 'MX'
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         super(MX, self).save(*args, **kwargs)
 
     def clean(self, *args, **kwargs):

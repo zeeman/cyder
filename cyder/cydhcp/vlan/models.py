@@ -8,8 +8,8 @@ from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel, LoggedModel
-from cyder.base.utils import safe_save
 from cyder.base.validators import validate_positive_integer_field
+from cyder.base.utils import transaction_atomic
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.utils import networks_to_Q
 
@@ -29,6 +29,7 @@ class Vlan(LoggedModel, BaseModel, ObjectUrlMixin):
     search_fields = ('name', 'number',)
     display_fields = ('name',)
     audit_fields = 'name', 'number'
+    sort_fields = ('name',)
 
     class Meta:
         app_label = 'cyder'
@@ -39,11 +40,11 @@ class Vlan(LoggedModel, BaseModel, ObjectUrlMixin):
         from cyder.cydhcp.vlan.log_serializer import VlanLogSerializer
         return VlanLogSerializer(self)
 
-    def __str__(self):
-        return '{0} ({1})'.format(get_display(self), self.number)
-
     def __repr__(self):
         return "<Vlan {0}>".format(str(self))
+
+    def __unicode__(self):
+        return u'{} ({})'.format(self.name, self.number)
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
@@ -93,8 +94,10 @@ class Vlan(LoggedModel, BaseModel, ObjectUrlMixin):
 
         return None
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         super(Vlan, self).save(*args, **kwargs)
 
 
