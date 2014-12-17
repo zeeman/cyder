@@ -1,24 +1,16 @@
+from gettext import gettext as _
+
 from django.db import models
 from django.core.exceptions import ValidationError
 
 from cyder.base.models import LoggedModel
-from cyder.cydns.models import CydnsRecord
+from cyder.base.utils import safe_save
 from cyder.cydns.cname.models import CNAME
-
-from cyder.cydns.validation import validate_mx_priority
-from cyder.cydns.validation import validate_fqdn
-from cyder.cydns.models import LabelDomainMixin
-
-# import reversion
-
-from gettext import gettext as _
+from cyder.cydns.models import CydnsRecord, LabelDomainMixin
+from cyder.cydns.validation import validate_fqdn, validate_mx_priority
 
 
 class MX(LoggedModel, LabelDomainMixin, CydnsRecord):
-    """
-    >>> MX(label=label, domain=domain, server=server, priority=prio,
-    ...     ttl=tll)
-    """
     pretty_type = 'MX'
 
     id = models.AutoField(primary_key=True)
@@ -37,8 +29,7 @@ class MX(LoggedModel, LabelDomainMixin, CydnsRecord):
     class Meta:
         app_label = 'cyder'
         db_table = 'mx'
-        # label and domain in CydnsRecord
-        unique_together = ('domain', 'label', 'server', 'priority')
+        unique_together = (('domain', 'label', 'server'),)
 
     def serializer(self):
         from cyder.cydns.mx.log_serializer import MXLogSerializer
@@ -78,8 +69,8 @@ class MX(LoggedModel, LabelDomainMixin, CydnsRecord):
     def rdtype(self):
         return 'MX'
 
+    @safe_save
     def save(self, *args, **kwargs):
-        self.full_clean()
         super(MX, self).save(*args, **kwargs)
 
     def clean(self, *args, **kwargs):

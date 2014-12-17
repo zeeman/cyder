@@ -11,8 +11,6 @@ urlpatterns += patterns(
     '',
     url(r'(?P<domain>[\w-]+)/create_delegated/$',
         create_ns_delegated, name='nameserver-delegated-create'),
-    url(r'(?P<domain>[\w-]+)/create/$',
-        NSCreateView.as_view(), name='nameserver-by-domain-create'),
     url(r'(?P<pk>[\w-]+)/$',
          nameserver_detail, name='nameserver-detail')
 )
