@@ -280,8 +280,7 @@ class Network(LoggedModel, BaseModel, ObjectUrlMixin):
                                   .format(self.ip_type, e))
         # Update fields
         self.ip_upper = int(self.network) >> 64
-        self.ip_lower = int(self.network) & (1 << 64) - 1  # Mask off
-                                                    # the last sixty-four bits
+        self.ip_lower = int(self.network) & (1 << 64) - 1
         self.prefixlen = self.network.prefixlen
         self.network_str = str(self.network)
 
@@ -296,6 +295,15 @@ class Network(LoggedModel, BaseModel, ObjectUrlMixin):
         elif self.ip_type == '6':
             raise Exception(
                 'Network.descendants does not currently support IPv6')
+
+    @property
+    def children(self):
+        self.update_network()
+        children = []
+        for d in self.descendants:
+            if d.parent == self:
+                children.append(d)
+        return children
 
     @property
     def parent(self):
