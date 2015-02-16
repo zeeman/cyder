@@ -6,7 +6,7 @@ from django.utils.safestring import mark_safe
 from rest_framework.renderers import JSONRenderer
 
 from cyder.base.utils import classproperty, dict_diff
-from cyder.settings.local import MAX_LOG_ENTRIES
+from cyder.settings import MAX_LOG_ENTRIES
 
 
 class DeleteLog(models.Model):
@@ -52,7 +52,7 @@ class LoggedModel(models.Model):
         changes.pop('last_save_user', None)
         changes.pop('modified', None)
 
-        if len(changes):
+        if changes:
             return JSONRenderer().render({
                 'last_save_user': data['last_save_user'],
                 'modified': datetime.now().strftime("%m/%d/%Y %H:%M:%S"),
