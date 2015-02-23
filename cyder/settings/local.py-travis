@@ -187,3 +187,5 @@ LANGUAGE_CODE = 'en-US'
 PROD_LANGUAGES = (
     'en-US',
 )
+
+MAX_LOG_ENTRIES = 5
