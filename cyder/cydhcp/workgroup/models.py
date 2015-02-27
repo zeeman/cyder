@@ -11,7 +11,7 @@ from cyder.base.utils import transaction_atomic
 from cyder.cydhcp.utils import join_dhcp_args
 
 
-class Workgroup(LoggedModel, BaseModel, ObjectUrlMixin):
+class Workgroup(BaseModel, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True)
 
