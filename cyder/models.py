@@ -1,4 +1,5 @@
 from cyder.api.authtoken.models import *
+from cyder.base.models import DeleteLog
 from cyder.base.eav.models import *
 from cyder.core.ctnr.models import *
 from cyder.core.cyuser.models import *

@@ -12,11 +12,36 @@ from cyder.settings import MAX_LOG_ENTRIES
 class DeleteLog(models.Model):
     obj_type = models.CharField(max_length=30)
     deleted = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, blank=True, null=True)
     log = models.TextField()
 
 
-class LoggedModel(models.Model):
+class Serializable(object):
+    """Supports translating an object to a serialized representation using
+    Django REST Framework serializers.
+    """
+    def serializer(self):
+        """
+        Should call a Django REST Framework serializer on self and return the
+        result. This is a function to avoid a circular import where the
+        serializer file imports the model and the model file imports the
+        serializer at the top level.
+        """
+        raise NotImplementedError("This model inherits from LoggedModel, but "
+                                  "it doesn't specify a serializer to use")
+
+    def serialized(self):
+        """
+        Serializes the model instance to a dict.
+        """
+        return self.serializer().data
+
+    @staticmethod
+    def render_to_json(data):
+        return JSONRenderer().render(data)
+
+
+class LoggedModel(Serializable, models.Model):
     """Allows changes to objects to be logged for auditing purposes.
 
     Objects inheriting from this class must specify an attribute audit_fields
@@ -32,34 +57,42 @@ class LoggedModel(models.Model):
     class Meta:
         abstract = True
 
-    def serializer(self):
+    def last_saved_version(self):
         """
-        Should call a Django REST Framework serializer on self and return the
-        result. This is a function to avoid a circular import where the
-        serializer file imports the model and the model file imports the
-        serializer at the top level.
+        Returns a model instance corresponding to the last saved version of
+        this object.
         """
-        raise NotImplementedError("This model inherits from LoggedModel, but "
-                                  "it doesn't specify a serializer to use")
+        return self.__class__.objects.get(pk=self.pk)
 
-    def serialized(self, old):
-        data = self.serializer().data
-        old_data = old.serializer().data
-        changes = dict_diff(old_data, data)
+    def to_json(self):
+        """
+        Creates a JSON-serialized string representing the record.
+        """
+        return self.render_to_json(self.serialized())
 
-        # these keys will be stored at the top level of the dict, so they
-        # don't need to be reproduced in the list of changes
+    def diff_to_json(self):
+        """
+        Creates a JSON-serialized string from the record containing what has
+        changed from the last saved version.
+
+        Preconditions: must be run after the model instance is modified but
+        before it is saved.
+        """
+        self_data = self.serialized()
+        old_data = self.last_saved_version().serialized()
+        changes = dict_diff(old_data, self_data)
+
+        # remove the metadata keys that we keep at the top-level of the dict
         changes.pop('last_save_user', None)
         changes.pop('modified', None)
 
         if changes:
-            return JSONRenderer().render({
-                'last_save_user': data['last_save_user'],
-                'modified': datetime.now().strftime("%m/%d/%Y %H:%M:%S"),
-                'changes': changes
-            })
+            return self.render_to_json({
+                'last_save_user': self_data['last_save_user'],
+                'modified': datetime.now().strftime('%m/%d/%Y %H:%M:%S'),
+                'changes': changes})
         else:
-            return None  # no changes have been made
+            return None
 
     def save(self, *args, **kwargs):
         # only update the log if the record has already been saved
@@ -68,7 +101,7 @@ class LoggedModel(models.Model):
             log_lines = self.log.split('\n')
 
             # get the serialized representation
-            change_log = self.serialized(old_data)
+            change_log = self.diff_to_json()
 
             # don't update the log if there are no changes
             if change_log is not None:
@@ -85,7 +118,7 @@ class LoggedModel(models.Model):
     def delete(self, user=None, *args, **kwargs):
         # before deleting, save the data to the DeleteLog
         dl = DeleteLog(obj_type=self.__class__.__name__,
-                       log=self.log + "\n" + self.serialized(),
+                       log=self.log + "\n" + self.to_json(),
                        user=user)
         dl.save()
         return super(LoggedModel, self).delete(*args, **kwargs)

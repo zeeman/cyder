@@ -6,7 +6,6 @@ from cyder.base.eav.constants import ATTRIBUTE_INVENTORY
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
-from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel, LoggedModel
 from cyder.base.validators import validate_positive_integer_field
 from cyder.base.utils import transaction_atomic
