@@ -14,6 +14,10 @@ class DeleteLog(models.Model):
     deleted = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, blank=True, null=True)
     log = models.TextField()
+    
+    class Meta:
+        app_label = 'cyder'
+        db_table = 'deletelog'
 
 
 class Serializable(object):
