@@ -10,10 +10,11 @@ class StaticInterfaceLogSerializer(BaseLogSerializer):
     workgroup = serializers.SlugRelatedField(slug_field='name')
     expire = serializers.DateTimeField(format="%m/%d/%Y")
     ip = serializers.CharField(source="ip_str")
+    name = serializers.CharField(source="fqdn")
 
     class Meta:
         model = StaticInterface
-        fields = ('fqdn', 'container', 'mac', 'reverse_domain', 
+        fields = ('name', 'container', 'mac', 'reverse_domain', 
                   'system', 'workgroup', 'dhcp_enabled', 'dns_enabled', 'ip', 
                   'last_save_user', 'description', 'expire')
 
