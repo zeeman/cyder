@@ -13,6 +13,7 @@ class StaticInterfaceLogSerializer(BaseLogSerializer):
 
     class Meta:
         model = StaticInterface
-        fields = ('container', 'mac', 'reverse_domain', 'system', 'workgroup',
-                  'dhcp_enabled', 'dns_enabled', 'ip', 'last_save_user',
-                  'description', 'expire')
+        fields = ('fqdn', 'container', 'mac', 'reverse_domain', 
+                  'system', 'workgroup', 'dhcp_enabled', 'dns_enabled', 'ip', 
+                  'last_save_user', 'description', 'expire')
+
