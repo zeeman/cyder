@@ -42,10 +42,7 @@ class SearchFieldFilter(filters.BaseFilterBackend):
 
         for q in request.QUERY_PARAMS:
             p = request.QUERY_PARAMS[q]
-            if q.endswith(("__regex", "__iregex")):
-                continue
-
-            elif q.startswith("i:"):
+            if q.startswith("i:"):
                 q_include[namehack(q[2:])] = p
 
             elif q.startswith("e:"):
